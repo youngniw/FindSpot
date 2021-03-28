@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/positionrow_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="서울특별시 용산구 임정로 7 (효창동, 숙명여자대학교 동문회관)"
+        android:textSize="15sp"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/positionrow_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:gravity="right"
+        android:text="X"
+        android:textColor="#ff0000"
+        android:textSize="20dp"
+        android:layout_marginLeft="15sp"
+        android:layout_gravity="center"/>
+</LinearLayout>
