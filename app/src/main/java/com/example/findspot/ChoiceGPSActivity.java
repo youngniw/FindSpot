@@ -1,27 +1,33 @@
 package com.example.findspot;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.UnsupportedEncodingException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 public class ChoiceGPSActivity extends AppCompatActivity {
     static String address;  // 주소(도로명주소/지번주소)
@@ -43,7 +49,6 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         ListView lv = (ListView) findViewById(R.id.choice_gps_lv_position);
         lv.setAdapter(listAdapter);
 
-        //*****************
         //테스트를 위해 항목추가
         PositionItem item1 = new PositionItem("서울특별시 용산구 임정로 7 (효창동, 숙명여자대학교 동문회관)", 0.0, 0.0);
         list.add(item1);             //리스트에 PositionItem 추가
@@ -97,29 +102,24 @@ public class ChoiceGPSActivity extends AppCompatActivity {
                 else {
                     Toast.makeText(ChoiceGPSActivity.this.getApplicationContext(), "주소가 입력되었습니다.", Toast.LENGTH_SHORT).show();
 
-                    String APIKey = "dc90ecf7e13bbcfd5d02a7a41ed33464";
+                    String resultText = "값이없음";
 
-                    PositionResource bodyJson = null;
                     try {
-                        String apiURL = "https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address, "UTF-8");
-
-                        HttpResponse<JsonNode> response = Unirest.get(apiURL).header("Authorization", APIKey).asJson();
-
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-                        bodyJson = objectMapper.readValue(response.getBody().toString(), PositionResource.class);
-                    } catch (UnsupportedEncodingException | UnirestException | JsonProcessingException e) {
+                        resultText = new Task().execute().get();
+                    } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }
+                    String[] resultXY = geojsonParser(resultText);
 
-                    longitude = bodyJson.getDocuments().get(0).getX();
-                    latitude = bodyJson.getDocuments().get(0).getY();
+                    longitude = Double.parseDouble(resultXY[0]);
+                    latitude = Double.parseDouble(resultXY[1]);
 
                     PositionItem item = new PositionItem(name, latitude, longitude);    //PositionItem 생성
                     list.add(item);             //리스트에 PositionItem 추가
                     et_position.setText("");    //et_position 초기화
                     listAdapter.notifyDataSetChanged(); //리스트 갱신
+
+                    Log.i("결과확인","name: "+ item.getName()+ "latitude: "+ String.valueOf(item.getLatitude())+ "longitude: "+ String.valueOf(item.getLongitude()));
                 }
             }
         });
@@ -153,5 +153,73 @@ public class ChoiceGPSActivity extends AppCompatActivity {
                 startActivity(it_showmiddle);
             }
         });
+    }
+
+    public class Task extends AsyncTask<String, Void, String> {
+
+        String receiveMsg = "";
+
+        String KAKAO_KEY = "dc90ecf7e13bbcfd5d02a7a41ed33464";
+        String auth = "KakaoAK " + KAKAO_KEY;
+        URL link= null;
+        HttpsURLConnection hc = null;
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address, "UTF-8"));
+
+                HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                    public boolean verify(String arg0, SSLSession arg1) {
+                        return true;
+                    }
+                });
+
+                hc = (HttpsURLConnection)link.openConnection();
+                hc.setRequestMethod("GET");
+                hc.setRequestProperty("User-Agent", "Java-Client");   // https 호출시 user-agent 필요
+                hc.setRequestProperty("X-Requested-With", "curl");
+                hc.setRequestProperty("Authorization", auth);
+
+                if (hc.getResponseCode() == hc.HTTP_OK) {
+                    InputStreamReader tmp = new InputStreamReader(hc.getInputStream(), "UTF-8");
+                    BufferedReader reader = new BufferedReader(tmp);
+                    StringBuffer buffer = new StringBuffer();
+                    String str;
+                    while ((str = reader.readLine()) != null) {
+                        buffer.append(str);
+                    }
+                    receiveMsg = buffer.toString();
+                    Log.i("receiveMsg : ", receiveMsg);
+
+                    reader.close();
+                } else {
+                    Log.i("통신 결과", hc.getResponseCode() + "에러");
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return receiveMsg;
+        }
+    }
+
+    public String[] geojsonParser(String jsonString) {
+        String x = null;
+        String y = null;
+        String[] arraysum = new String[2];
+        try {
+            JSONArray jarray = new JSONObject(jsonString).getJSONArray("documents");
+            JSONObject jObject = jarray.getJSONObject(0).getJSONObject("road_address");
+            x = (String) jObject.optString("x");
+            y = (String) jObject.optString("y");
+            arraysum[0] = x;
+            arraysum[1] = y;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return arraysum;
     }
 }
