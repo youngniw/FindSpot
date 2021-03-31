@@ -49,6 +49,7 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         ListView lv = (ListView) findViewById(R.id.choice_gps_lv_position);
         lv.setAdapter(listAdapter);
 
+        //*****************
         //테스트를 위해 항목추가
         PositionItem item1 = new PositionItem("서울특별시 용산구 임정로 7 (효창동, 숙명여자대학교 동문회관)", 0.0, 0.0);
         list.add(item1);             //리스트에 PositionItem 추가
@@ -88,43 +89,38 @@ public class ChoiceGPSActivity extends AppCompatActivity {
 
 
     void choice_btn_clickListener() {
-        //사용자 위치 항목 추가하기 (이벤트)
-        btn_add.setOnClickListener(new View.OnClickListener() {        //위치 추가 버튼 클릭
+        btn_add.setOnClickListener(new View.OnClickListener() { //"추가" 버튼 클릭시,
             @Override
             public void onClick(View v) {
                 String name = et_position.getText().toString();
-                double longitude = 0.0, latitude = 0.0;
 
                 //좌표제공API로 위도경도 알아내고, PositionItem에 값 넣기
+                double longitude = 0.0, latitude = 0.0;
                 if ((name.equals(""))) {    //도로명주소가 입력되지 않았는데 '추가'버튼을 클릭할 경우
                     Toast.makeText(ChoiceGPSActivity.this.getApplicationContext(), "주소가 입력되지 않았습니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    Toast.makeText(ChoiceGPSActivity.this.getApplicationContext(), "주소가 입력되었습니다.", Toast.LENGTH_SHORT).show();
-
                     String resultText = "값이없음";
-
                     try {
                         resultText = new Task().execute().get();
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }
-                    String[] resultXY = geojsonParser(resultText);
 
-                    longitude = Double.parseDouble(resultXY[0]);
-                    latitude = Double.parseDouble(resultXY[1]);
+                    String[] resultXY = geojsonParser(resultText);  //JSON 형식에서 x,y값 추출하기
+
+                    longitude = Double.parseDouble(resultXY[0]);    //string에서 double로 형변환
+                    latitude = Double.parseDouble(resultXY[1]);     //string에서 double로 형변환
 
                     PositionItem item = new PositionItem(name, latitude, longitude);    //PositionItem 생성
                     list.add(item);             //리스트에 PositionItem 추가
                     et_position.setText("");    //et_position 초기화
                     listAdapter.notifyDataSetChanged(); //리스트 갱신
-
-                    Log.i("결과확인","name: "+ item.getName()+ "latitude: "+ String.valueOf(item.getLatitude())+ "longitude: "+ String.valueOf(item.getLongitude()));
                 }
             }
         });
 
-        btn_search_time.setOnClickListener(new View.OnClickListener() {
+        btn_search_time.setOnClickListener(new View.OnClickListener() { //"시간 기준" 버튼 클릭시,
             @Override
             public void onClick(View v) {
                 //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
@@ -139,7 +135,7 @@ public class ChoiceGPSActivity extends AppCompatActivity {
             }
         });
 
-        btn_search_distance.setOnClickListener(new View.OnClickListener() {
+        btn_search_distance.setOnClickListener(new View.OnClickListener() { //"거리 기준" 버튼 클릭시,
             @Override
             public void onClick(View v) {
                 //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
@@ -155,11 +151,11 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         });
     }
 
+    //KaKao Geocode API 통해 주소 검색 결과 받기
     public class Task extends AsyncTask<String, Void, String> {
-
         String receiveMsg = "";
 
-        String KAKAO_KEY = "dc90ecf7e13bbcfd5d02a7a41ed33464";
+        String KAKAO_KEY = "dc90ecf7e13bbcfd5d02a7a41ed33464";  //KAKAO REST API 키
         String auth = "KakaoAK " + KAKAO_KEY;
         URL link= null;
         HttpsURLConnection hc = null;
@@ -167,7 +163,7 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             try {
-                link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address, "UTF-8"));
+                link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address, "UTF-8")); //한글을 URL용으로 인코딩
 
                 HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
                     public boolean verify(String arg0, SSLSession arg1) {
@@ -177,10 +173,11 @@ public class ChoiceGPSActivity extends AppCompatActivity {
 
                 hc = (HttpsURLConnection)link.openConnection();
                 hc.setRequestMethod("GET");
-                hc.setRequestProperty("User-Agent", "Java-Client");   // https 호출시 user-agent 필요
+                hc.setRequestProperty("User-Agent", "Java-Client");   //https 호출시 user-agent 필요
                 hc.setRequestProperty("X-Requested-With", "curl");
                 hc.setRequestProperty("Authorization", auth);
 
+                //String 형태로 결과 받기
                 if (hc.getResponseCode() == hc.HTTP_OK) {
                     InputStreamReader tmp = new InputStreamReader(hc.getInputStream(), "UTF-8");
                     BufferedReader reader = new BufferedReader(tmp);
@@ -206,17 +203,19 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         }
     }
 
+    //API 문자열 결과 JSON으로 파싱하기
     public String[] geojsonParser(String jsonString) {
-        String[] arraysum = new String[2];
+        String[] geo_array = new String[2]; //API 결과 중 필요한 값(x,y)
+
         try {
             JSONArray jarray = new JSONObject(jsonString).getJSONArray("documents");
             JSONObject jObject = jarray.getJSONObject(0).getJSONObject("road_address");
-            arraysum[0] = (String) jObject.optString("x");
-            arraysum[1] = (String) jObject.optString("y");
 
+            geo_array[0] = (String) jObject.optString("x");  //x좌표
+            geo_array[1] = (String) jObject.optString("y");  //y좌표
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return arraysum;
+        return geo_array;
     }
 }
