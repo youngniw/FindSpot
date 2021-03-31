@@ -207,16 +207,13 @@ public class ChoiceGPSActivity extends AppCompatActivity {
     }
 
     public String[] geojsonParser(String jsonString) {
-        String x = null;
-        String y = null;
         String[] arraysum = new String[2];
         try {
             JSONArray jarray = new JSONObject(jsonString).getJSONArray("documents");
             JSONObject jObject = jarray.getJSONObject(0).getJSONObject("road_address");
-            x = (String) jObject.optString("x");
-            y = (String) jObject.optString("y");
-            arraysum[0] = x;
-            arraysum[1] = y;
+            arraysum[0] = (String) jObject.optString("x");
+            arraysum[1] = (String) jObject.optString("y");
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
