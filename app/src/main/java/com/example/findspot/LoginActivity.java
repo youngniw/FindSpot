@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class LoginActivity extends AppCompatActivity {
     EditText et_loginID, et_loginPW;
     Button btn_login, btn_join;
-    ImageButton btn_login_kakao, btn_login_naver, btn_login_google, btn_login_facebook;
+    ImageButton imgbtn_login_kakao, imgbtn_login_naver, imgbtn_login_google, imgbtn_login_facebook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,10 +25,10 @@ public class LoginActivity extends AppCompatActivity {
         btn_login = (Button) findViewById(R.id.login_login_btn);        //로그인 버튼
         btn_join = (Button) findViewById(R.id.login_join_btn);          //회원가입 버튼
 
-        btn_login_kakao = (ImageButton) findViewById(R.id.login_kakao);          //카카오로 로그인하는 이미지버튼
-        btn_login_naver = (ImageButton) findViewById(R.id.login_naver);          //네이버로 로그인하는 이미지버튼
-        btn_login_google = (ImageButton) findViewById(R.id.login_google);        //구글로 로그인하는 이미지버튼
-        btn_login_facebook = (ImageButton) findViewById(R.id.login_facebook);    //페이스북으로 로그인하는 이미지버튼
+        imgbtn_login_kakao = (ImageButton) findViewById(R.id.login_kakao);          //카카오로 로그인하는 이미지버튼
+        imgbtn_login_naver = (ImageButton) findViewById(R.id.login_naver);          //네이버로 로그인하는 이미지버튼
+        imgbtn_login_google = (ImageButton) findViewById(R.id.login_google);        //구글로 로그인하는 이미지버튼
+        imgbtn_login_facebook = (ImageButton) findViewById(R.id.login_facebook);    //페이스북으로 로그인하는 이미지버튼
 
         login_et_clickListener();         //로그인 화면에서 id와 비밀번호를 입력할 수 있는 edittext객체의 onClickListener를 정의한 함수를 호출함
         login_btn_clickListener();        //로그인 화면의 버튼에 해당하는 onClickListener를 정의한 함수를 호출함

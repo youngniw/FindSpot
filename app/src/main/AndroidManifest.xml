@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config">
-        <activity android:name=".ChoiceGPSActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +23,10 @@
         </activity>
         <activity android:name=".JoinActivity"></activity>
         <activity android:name=".HomeActivity"></activity>
-        <!--    <activity android:name=".ChoiceGPSActivity"></activity> -->
+        <activity android:name=".ChoiceGPSActivity"></activity>
+        <activity android:name=".MyPageActivity"></activity>
+        <activity android:name=".FriendActivity"></activity>
+        <activity android:name=".GroupActivity"></activity>
         <activity android:name=".ShowMiddleActivity"></activity>
         <activity android:name=".DaumWebViewActivity"></activity>
 
