@@ -8,7 +8,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import static com.example.findspot.ChoiceGPSActivity.address;
+import static com.example.findspot.ChoiceGPSRandomActivity.address;
 
 public class DaumWebViewActivity extends AppCompatActivity {
 

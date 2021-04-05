@@ -29,24 +29,24 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
-public class ChoiceGPSActivity extends AppCompatActivity {
+public class ChoiceGPSRandomActivity extends AppCompatActivity {
     static String address;  // 주소(도로명주소/지번주소)
 
     EditText et_position;
     Button btn_add, btn_search_time, btn_search_distance;
-    ArrayList<PositionItem> list;       //(도로명주소,위도,경도)로 구성된 리스트
+    static ArrayList<PositionItem> list;       //(도로명주소,위도,경도)로 구성된 리스트
     PositionListAdapter listAdapter;    //위치 리스트 어댑터(UI 구현)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_choice_gps);
+        setContentView(R.layout.activity_choice_gps_random);
 
         list = new ArrayList<PositionItem>();
 
         //위치 기록을 위한 리스트 초기설정
         listAdapter = new PositionListAdapter(this, R.layout.positionrow, list);
-        ListView lv = (ListView) findViewById(R.id.choice_gps_lv_position);
+        ListView lv = (ListView) findViewById(R.id.choice_gps_r_lv_position);
         lv.setAdapter(listAdapter);
 
         //*****************
@@ -57,12 +57,12 @@ public class ChoiceGPSActivity extends AppCompatActivity {
         list.add(item1);             //리스트에 PositionItem 추가
         listAdapter.notifyDataSetChanged(); //리스트 갱신
 
-        et_position = (EditText) findViewById(R.id.choice_gps_et_inputPosition);    //위치를 입력하는 editText
+        et_position = (EditText) findViewById(R.id.choice_gps_r_et_inputPosition);    //위치를 입력하는 editText
         et_position.setFocusable(false);
 
-        btn_add = (Button) findViewById(R.id.choice_gps_bt_add);
-        btn_search_time = (Button) findViewById(R.id.choice_gps_bt_time);
-        btn_search_distance = (Button) findViewById(R.id.choice_gps_bt_distance);
+        btn_add = (Button) findViewById(R.id.choice_gps_r_bt_add);
+        btn_search_time = (Button) findViewById(R.id.choice_gps_r_bt_time);
+        btn_search_distance = (Button) findViewById(R.id.choice_gps_r_bt_distance);
 
         choice_et_clickListener();         //사용자 위치 설정 화면의 버튼에 해당하는 onClickListener를 정의한 함수를 호출함
         choice_btn_clickListener();        //사용자 GPS 설정 화면의 버튼에 해당하는 onClickListener를 정의한 함수를 호출함
@@ -73,7 +73,7 @@ public class ChoiceGPSActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //도로명주소 API 오픈 (DaumWebViewActivity.java 실행)
-                Intent it_address = new Intent(ChoiceGPSActivity.this, DaumWebViewActivity.class);
+                Intent it_address = new Intent(ChoiceGPSRandomActivity.this, DaumWebViewActivity.class);
                 startActivityForResult(it_address, 100);
             }
         });
@@ -97,7 +97,7 @@ public class ChoiceGPSActivity extends AppCompatActivity {
                 //좌표제공API로 위도경도 알아내고, PositionItem에 값 넣기
                 double longitude = 0.0, latitude = 0.0;
                 if ((name.equals(""))) {    //도로명주소가 입력되지 않았는데 '추가'버튼을 클릭할 경우
-                    Toast.makeText(ChoiceGPSActivity.this.getApplicationContext(), "주소가 입력되지 않았습니다.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ChoiceGPSRandomActivity.this.getApplicationContext(), "주소가 입력되지 않았습니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     String resultText = "값이없음";
@@ -124,13 +124,8 @@ public class ChoiceGPSActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
-                Intent it_showmiddle = new Intent(ChoiceGPSActivity.this, ShowMiddleActivity.class);
-
-                // 넘겨줄 데이터 Bundle 형태로 만들기
-                Bundle extras = new Bundle();
-                extras.putString("standard_tag", "time");    //시간 기준
-                it_showmiddle.putExtras(extras);
-
+                Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
+                it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
                 startActivity(it_showmiddle);
             }
         });
@@ -139,13 +134,8 @@ public class ChoiceGPSActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
-                Intent it_showmiddle = new Intent(ChoiceGPSActivity.this, ShowMiddleActivity.class);
-
-                // 넘겨줄 데이터 Bundle 형태로 만들기
-                Bundle extras = new Bundle();
-                extras.putString("standard_tag", "distance");    //거리 기준
-                it_showmiddle.putExtras(extras);
-
+                Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
+                it_showmiddle.putExtra("standard_tag", "distance");    //거리 기준
                 startActivity(it_showmiddle);
             }
         });

@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -94,7 +93,7 @@ public class SelectWhomActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //activity_choice_gps로 화면 이동하고 시간 기준임을 intent로 전달
-                Intent it_choiceGps = new Intent(SelectWhomActivity.this, ChoiceGPSActivity.class);
+                Intent it_choiceGps = new Intent(SelectWhomActivity.this, ChoiceGPSRandomActivity.class);
 
                 // 넘겨줄 데이터 Bundle 형태로 만들기
                 Bundle extras = new Bundle();

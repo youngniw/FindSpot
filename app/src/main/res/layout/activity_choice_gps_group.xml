@@ -7,8 +7,9 @@
     android:layout_margin="3dp"
     android:background="@drawable/full_border">
 
+    <!--상단바(제목)-->
     <TextView
-        android:id="@+id/choice_gps_title"
+        android:id="@+id/choice_gps_g_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -24,7 +25,7 @@
         app:layout_constraintVertical_bias="0"/>
 
     <View
-        android:id="@+id/choice_gps_baseline01"
+        android:id="@+id/choice_gps_g_baseline01"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="15dp"
@@ -32,72 +33,59 @@
         android:layout_marginRight="1dp"
         android:layout_marginLeft="1dp"
         android:background="#555555"
-        app:layout_constraintTop_toBottomOf="@id/choice_gps_title"
+        app:layout_constraintTop_toBottomOf="@id/choice_gps_g_title"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0" />
 
-    <LinearLayout
-        android:id="@+id/choice_gps_layout01"
-        android:layout_width="match_parent"
+    <!--이전에 이 그룹으로 위치를 선택한 적이 있다면 클릭을 통해 불러올 수 있음
+    ************************이후에 DB의 history값을 보고 "시간 기준으로"와 "거리 기준으로"로 텍스트 자바로 변경되게-->
+    <TextView
+        android:id="@+id/choice_gps_g_applyhistory"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        app:layout_constraintTop_toBottomOf="@id/choice_gps_baseline01"
+        android:scrollHorizontally="false"
+        android:text="최근에 [시간/거리] 찾은 위치 보기  >>"
+        android:textColor="#00A500"
+        android:textAlignment="textEnd"
+        app:layout_constraintTop_toBottomOf="@id/choice_gps_g_baseline01"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.03">
+        app:layout_constraintVertical_bias="0.03"
+        app:layout_constraintHorizontal_bias="0.90" />
 
-        <LinearLayout
-            android:id="@+id/choice_gps_layout02"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/choice_gps_et_inputPosition"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scrollHorizontally="false"
-                android:layout_weight="1"/>
-
-            <Button
-                android:id="@+id/choice_gps_bt_add"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="추가"/>
-        </LinearLayout>
-
-        <ListView
-            android:id="@+id/choice_gps_lv_position"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:transcriptMode="alwaysScroll"
-            android:paddingTop="30dp"
-            app:layout_constraintTop_toBottomOf="@id/choice_gps_layout02"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/choice_gps_select" />
-    </LinearLayout>
+    <!--위치 선택하는 부분-->
+    <ListView
+        android:id="@+id/choice_gps_g_lv_position"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:transcriptMode="alwaysScroll"
+        android:paddingTop="30dp"
+        app:layout_constraintTop_toBottomOf="@id/choice_gps_g_applyhistory"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/choice_gps_g_select"/>
 
     <LinearLayout
-        android:id="@+id/choice_gps_select"
+        android:id="@+id/choice_gps_g_select"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="right"
         android:layout_marginBottom="10dp"
-        app:layout_constraintTop_toBottomOf="@id/choice_gps_layout01"
+        app:layout_constraintTop_toBottomOf="@id/choice_gps_g_lv_position"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/copyright"
         app:layout_constraintVertical_bias="1">
 
         <Button
-            android:id="@+id/choice_gps_bt_time"
+            android:id="@+id/choice_gps_g_bt_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -106,7 +94,7 @@
             android:text="시간 기준" />
 
         <Button
-            android:id="@+id/choice_gps_bt_distance"
+            android:id="@+id/choice_gps_g_bt_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

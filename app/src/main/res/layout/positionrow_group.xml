@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!--"1. 위영은", "2."과 같이 인덱스가 표시됨-->
+        <TextView
+            android:id="@+id/positionrow_g_indexName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1. 위영은"
+            android:textSize="20sp"
+            android:textColor="#000000" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/positionrow_g_applyPosition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장된 위치 사용"/>
+
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/positionrow_g_et_inputPosition"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:scrollHorizontally="false"/>
+</LinearLayout>
