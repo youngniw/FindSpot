@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
         MapView mapView = new MapView(this);
 
-        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
+        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.shownmiddle_mapview);
         mapViewContainer.addView(mapView);
     }
 }
