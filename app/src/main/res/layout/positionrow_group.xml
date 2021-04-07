@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="1. 위영은"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textColor="#000000" />
 
         <TextView
@@ -28,6 +28,7 @@
             android:id="@+id/positionrow_g_applyPosition"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:text="저장된 위치 사용"/>
 
     </LinearLayout>
@@ -36,6 +37,7 @@
         android:id="@+id/positionrow_g_et_inputPosition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="15sp"
         android:focusable="false"
         android:scrollHorizontally="false"/>
 </LinearLayout>

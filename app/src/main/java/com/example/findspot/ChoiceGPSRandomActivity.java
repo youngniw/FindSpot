@@ -30,11 +30,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
 public class ChoiceGPSRandomActivity extends AppCompatActivity {
-    static String address;  // 주소(도로명주소/지번주소)
+    static String address_r;  // 주소(도로명주소/지번주소)
 
     EditText et_position;
     Button btn_add, btn_search_time, btn_search_distance;
-    static ArrayList<PositionItem> list;       //(도로명주소,위도,경도)로 구성된 리스트
+    static ArrayList<PositionItem> list_random;       //(도로명주소,위도,경도)로 구성된 리스트
     PositionListAdapter listAdapter;    //위치 리스트 어댑터(UI 구현)
 
     @Override
@@ -42,23 +42,14 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choice_gps_random);
 
-        list = new ArrayList<PositionItem>();
+        list_random = new ArrayList<PositionItem>();
 
         //위치 기록을 위한 리스트 초기설정
-        listAdapter = new PositionListAdapter(this, R.layout.positionrow, list);
+        listAdapter = new PositionListAdapter(this, R.layout.positionrow, list_random);
         ListView lv = (ListView) findViewById(R.id.choice_gps_r_lv_position);
         lv.setAdapter(listAdapter);
 
-        //*****************
-        //테스트를 위해 항목추가
-        PositionItem item1 = new PositionItem("서울특별시 용산구 임정로 7 (효창동, 숙명여자대학교 동문회관)", 0.0, 0.0);
-        list.add(item1);             //리스트에 PositionItem 추가
-        item1 = new PositionItem("서울특별시 서초구 남부순환로 2406(서초동)", 0.0, 0.0);
-        list.add(item1);             //리스트에 PositionItem 추가
-        listAdapter.notifyDataSetChanged(); //리스트 갱신
-
         et_position = (EditText) findViewById(R.id.choice_gps_r_et_inputPosition);    //위치를 입력하는 editText
-        et_position.setFocusable(false);
 
         btn_add = (Button) findViewById(R.id.choice_gps_r_bt_add);
         btn_search_time = (Button) findViewById(R.id.choice_gps_r_bt_time);
@@ -74,6 +65,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //도로명주소 API 오픈 (DaumWebViewActivity.java 실행)
                 Intent it_address = new Intent(ChoiceGPSRandomActivity.this, DaumWebViewActivity.class);
+                it_address.putExtra("name", "");
                 startActivityForResult(it_address, 100);
             }
         });
@@ -83,7 +75,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
     {
         super.onActivityResult(requestCode, resultCode, intent);
         if(requestCode == 100 && resultCode == 1) {
-            et_position.setText(String.format("%s", address));
+            et_position.setText(String.format("%s", address_r));
         }
     }
 
@@ -113,7 +105,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
                     latitude = Double.parseDouble(resultXY[1]);     //string에서 double로 형변환
 
                     PositionItem item = new PositionItem(name, latitude, longitude);    //PositionItem 생성
-                    list.add(item);             //리스트에 PositionItem 추가
+                    list_random.add(item);      //리스트에 PositionItem 추가
                     et_position.setText("");    //et_position 초기화
                     listAdapter.notifyDataSetChanged(); //리스트 갱신
                 }
@@ -126,6 +118,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
                 //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
                 Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
                 it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
+                it_showmiddle.putExtra("activity_tag", "random");   //어떤 Activity인지(random / group)
                 startActivity(it_showmiddle);
             }
         });
@@ -136,6 +129,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
                 //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
                 Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
                 it_showmiddle.putExtra("standard_tag", "distance");    //거리 기준
+                it_showmiddle.putExtra("activity_tag", "random");      //어떤 Activity인지(random / group)
                 startActivity(it_showmiddle);
             }
         });
@@ -153,7 +147,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             try {
-                link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address, "UTF-8")); //한글을 URL용으로 인코딩
+                link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(address_r, "UTF-8")); //한글을 URL용으로 인코딩
 
                 HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
                     public boolean verify(String arg0, SSLSession arg1) {

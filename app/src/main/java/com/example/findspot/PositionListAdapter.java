@@ -34,20 +34,17 @@ public class PositionListAdapter extends BaseAdapter {
     public PositionItem getItem(int pos) { return this.src.get(pos); }
 
     //위치에 대응하는 아이템 아이디 반환
-    //*******************************
     @Override
     public long getItemId(int pos) { return pos; }
 
     @Override
     public View getView(final int pos, View convertView, ViewGroup parent) {
         //처음일 경우, View 생성
-        if(convertView == null) {
-            convertView = inflater.inflate(layout, parent, false);
-        }
+        if(convertView == null) { convertView = inflater.inflate(layout, parent, false); }
 
         //도로명주소 TextView 값 지정
         TextView tv_name = (TextView)convertView.findViewById(R.id.positionrow_text);
-        tv_name.setText(src.get(pos).getName());
+        tv_name.setText(src.get(pos).getRoadName());
 
         //선택된 항목 삭제하기 (이벤트)
         TextView tv_delete = (TextView)convertView.findViewById(R.id.positionrow_delete);
@@ -62,5 +59,4 @@ public class PositionListAdapter extends BaseAdapter {
         });
         return convertView;
     }
-
 }

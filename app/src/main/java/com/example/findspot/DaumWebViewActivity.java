@@ -8,7 +8,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import static com.example.findspot.ChoiceGPSRandomActivity.address;
+import static com.example.findspot.ChoiceGPSRandomActivity.address_r;
+import static com.example.findspot.ChoiceGPSGroupActivity.position_tmp;
 
 public class DaumWebViewActivity extends AppCompatActivity {
 
@@ -19,8 +20,13 @@ public class DaumWebViewActivity extends AppCompatActivity {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void processDATA(String data) {
+            String getExtra_nickName = getIntent().getStringExtra("name");
+            if (getExtra_nickName.equals("")) address_r = data;
+            else {
+                position_tmp.add(new PositionItem(getExtra_nickName, data, 360, 360));
+            }
+
             Intent intent = new Intent();
-            address = data;
             setResult(1, intent);
             finish();
         }
@@ -42,7 +48,6 @@ public class DaumWebViewActivity extends AppCompatActivity {
                 browser.loadUrl("javascript:sample2_execDaumPostcode();");
             }
         });
-
 
         browser.loadUrl("http://222.111.4.158/wheremiddle/daum.html");
     }
