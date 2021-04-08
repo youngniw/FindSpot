@@ -43,8 +43,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         position_tmp = new ArrayList<PositionItem>();
 
         list_group = new ArrayList<PositionItem>();
-        list_group.add(new PositionItem("위영은", "일월역", 30.2384273895723, 10.129381294));
-        list_group.add(new PositionItem("아야여", "설레발", 80.2384273895723, 60.129381294));
 
         list_g_users = new ArrayList<PositionItem>();
         //**********************************(DB로부터 PositionGroupUserItem를 그룹의 인원수만큼 받아와야함)********************************************************
@@ -91,7 +89,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == 101 && resultCode == 1) {
-            //**********************api 써야함
             String resultText = "값이없음";
             try {
                 resultText = new ChoiceGPSGroupActivity.Task().execute().get();
@@ -104,10 +101,15 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
             position_tmp.get(0).setLatitude(Double.parseDouble(resultXY[1]));
 
             //이미 한번 위치를 추가한 적이 있다면 바꾸고, 아니라면 위치 결과들을 모아놓은 list_group에 추가함
-            if (list_group.contains(position_tmp.get(0).getUserName()))
-                list_group.set(list_group.indexOf(position_tmp.get(0).getUserName()), position_tmp.get(0));
-            else
-                list_group.add(position_tmp.get(0));
+            boolean ischange_flag = false;
+            for (int i = 0 ; i < list_group.size(); i++) {
+                if (list_group.get(i).getUserName().equals(position_tmp.get(0).getUserName())) {
+                    list_group.set(i, position_tmp.get(0));
+                    ischange_flag = true;
+                    break;
+                }
+            }
+            if (!ischange_flag) list_group.add(position_tmp.get(0));
 
             position_tmp.remove(0); //0번째 아이템 삭제
             listAdapter.notifyDataSetChanged();     //리스트 갱신

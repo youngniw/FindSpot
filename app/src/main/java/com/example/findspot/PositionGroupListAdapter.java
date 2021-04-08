@@ -3,7 +3,6 @@ package com.example.findspot;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +53,12 @@ public class PositionGroupListAdapter extends BaseAdapter {
         EditText et_inputPosition = (EditText)convertView.findViewById(R.id.positionrow_g_et_inputPosition);
 
         //위치를 선택해 저장했다면, 해당 내용이 리스트뷰에 보여
-        if (list_group.contains(getItem(pos).getUserName())) { et_inputPosition.setText(list_group.get(list_group.indexOf(getItem(pos).getUserName())).getRoadName()); }
+        for (int i = 0 ; i < list_group.size(); i++) {
+            if (list_group.get(i).getUserName().equals(getItem(pos).getUserName())) {
+                et_inputPosition.setText(list_group.get(i).getRoadName());
+                break;
+            }
+        }
 
         //유저 정보에서 저장된 위치 불러오기
         final View finalConvertView = convertView;
@@ -66,10 +70,15 @@ public class PositionGroupListAdapter extends BaseAdapter {
                 PositionItem item = new PositionItem(getItem(pos).getUserName(), getItem(pos).getRoadName(), getItem(pos).getLatitude(), getItem(pos).getLongitude());
 
                 //이미 한번 위치를 추가한 적이 있다면 바꾸고, 아니라면 위치 결과들을 모아놓은 list_group에 추가함
-                if (list_group.contains(getItem(pos).getUserName()))
-                    list_group.set(list_group.indexOf(getItem(pos).getUserName()), item);
-                else
-                    list_group.add(item);
+                boolean ischange_flag = false;
+                for (int i = 0 ; i < list_group.size(); i++) {
+                    if (list_group.get(i).getUserName().equals(getItem(pos).getUserName())) {
+                        list_group.set(i, item);
+                        ischange_flag = true;
+                        break;
+                    }
+                }
+                if (!ischange_flag) list_group.add(item);
 
                 EditText et_group_position = (EditText) finalConvertView.findViewById(R.id.positionrow_g_et_inputPosition);
                 et_group_position.setText(getItem(pos).getRoadName());
