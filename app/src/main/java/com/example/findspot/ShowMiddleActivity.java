@@ -2,7 +2,9 @@ package com.example.findspot;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,8 +16,13 @@ import java.util.ArrayList;
 
 import static com.example.findspot.ChoiceGPSRandomActivity.list_random;
 import static com.example.findspot.ChoiceGPSGroupActivity.list_group;
+/*
+추가할 기능
+- 버튼으로 모두 볼수 있도록 줌아웃 //MapView.fitMapViewAreaToShowAllPOIItems()
+- ItemName 누르면 그곳으로 포커스, 4레벨 줌인
+ */
 
-public class ShowMiddleActivity extends AppCompatActivity {
+public class ShowMiddleActivity extends AppCompatActivity implements MapView.POIItemEventListener {
     ArrayList<PositionItem> list;
 
     @Override
@@ -23,11 +30,19 @@ public class ShowMiddleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_showmiddle);
 
-        MapView mapView = new MapView(this);
+        final MapView mapView = new MapView(this);
         ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.shownmiddle_mapview);
         mapViewContainer.addView(mapView);
 
-        //이전 ACtivity에 따라 사용할 list 설정
+        ImageButton wholegps = findViewById(R.id.shownmiddle_viewAllUser);
+        wholegps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mapView.fitMapViewAreaToShowAllPOIItems();
+            }
+        });
+
+        //이전 Activity에 따라 사용할 list 설정
         String getExtra_activity = getIntent().getStringExtra("activity_tag");
         if (getExtra_activity.equals("random")) list = list_random;
         else if (getExtra_activity.equals("group")) list = list_group;
@@ -40,8 +55,10 @@ public class ShowMiddleActivity extends AppCompatActivity {
             user_ping.setMapPoint(MapPoint.mapPointWithGeoCoord(list.get(i).getLatitude(), list.get(i).getLongitude()));     //ping 위치 지정(위도 y, 경도 x)
             user_ping.setMarkerType(MapPOIItem.MarkerType.CustomImage);
             user_ping.setCustomImageResourceId(R.drawable.peoplepin_50);
+            //user_ping.setShowDisclosureButtonOnCalloutBalloon(false); // 말풍선 옆에 꺽쇠 표시 안함
             mapView.addPOIItem(user_ping);   //지도에 ping 추가
         }
+        mapView.setPOIItemEventListener(this);
 
         //시간/거리 기준에 따라 중간지점 보여주기
         String getExtra_standard = getIntent().getStringExtra("standard_tag");
@@ -64,12 +81,26 @@ public class ShowMiddleActivity extends AppCompatActivity {
             middle_d.setMarkerType(MapPOIItem.MarkerType.CustomImage);
             middle_d.setCustomImageResourceId(R.drawable.middlepin_64);
             middle_d.setSelectedMarkerType(null);                       //선택 효과 마커 타입
-            //middle_d.setSelectedMarkerType(MapPOIItem.MarkerType.CustomImage);
-            //middle_d.setCustomSelectedImageResourceId(int imageResourceId);   //hdpi 기준으로 작업된 이미지를 지정하면 다른 dpi 단말에서는 이미지가 자동으로 적절한 크기로 scaling 되어 나타남
             mapView.addPOIItem(middle_d);   //지도에 ping 추가
 
             mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(avgY, avgX), 4, false); //중간지점을 기준으로 화면의 중심점 및 줌레벨 설정
         }
-        //************* 핑을 누르면 이벤트로 그곳 setMapCenerPointAndZoomLevel
     }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+        //지하철역이면 추천스팟 보여주는 Activity로 intent 전달
+        //나머지는 포커싱 및 zoom 4레벨
+        mapView.setMapCenterPointAndZoomLevel(mapPOIItem.getMapPoint(), 4, false); //중간지점을 기준으로 화면의 중심점 및 줌레벨 설정
+    }
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+        //지하철역이면 추천스팟 보여주는 Activity로 intent 전달
+        //나머지는 포커싱 및 zoom 4레벨
+        mapView.setMapCenterPointAndZoomLevel(mapPOIItem.getMapPoint(), 4, false); //중간지점을 기준으로 화면의 중심점 및 줌레벨 설정
+    }
+    @Override
+    public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) { }
+    @Override
+    public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) { }
 }

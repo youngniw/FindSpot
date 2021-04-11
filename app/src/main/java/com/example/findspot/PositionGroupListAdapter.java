@@ -87,7 +87,7 @@ public class PositionGroupListAdapter extends BaseAdapter {
             }
         });
 
-        //도로명 검색하기*********************************************(여기에 나중에 넘겨받은 값 setText로 보여줘야함)
+        //도로명 검색하기
         et_inputPosition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
