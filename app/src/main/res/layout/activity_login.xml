@@ -54,12 +54,14 @@
             <TextView
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
                 android:text="ID:" />
 
             <EditText
                 android:id="@+id/login_ID_input"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="#000000" />
 
         </LinearLayout>
 
@@ -74,13 +76,15 @@
             <TextView
                 android:layout_width="80dp"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
                 android:text="Password:" />
 
             <EditText
                 android:id="@+id/login_PW_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="#000000" />
         </LinearLayout>
 
         <LinearLayout
