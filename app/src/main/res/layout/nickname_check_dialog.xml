@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="350dp"
+    android:background="#F9F9F9">
+
+    <LinearLayout
+        android:id="@+id/nickNameDialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/holo_green_light">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="닉네임 변경"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/nickNameDialog_explain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="사용하실 닉네임을 입력해주세요."
+        android:paddingTop="25dp"
+        android:paddingBottom="20dp"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:layout_below="@id/nickNameDialog_title" />
+
+    <EditText
+        android:id="@+id/nickNameDialog_nickname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft = "15dp"
+        android:layout_marginRight = "15dp"
+        android:background="@drawable/menu_border"
+        android:layout_below="@id/nickNameDialog_explain" />
+
+    <TextView
+        android:id="@+id/nickNameDialog_isCheckedNickName"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textColor="#ff0000"
+        android:textSize="11sp"
+        android:text="* 이미 중복된 닉네임이 있습니다."
+        android:layout_below="@id/nickNameDialog_nickname"/>
+
+<Button
+    android:id="@+id/nickNameDialog_complete"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:layout_alignParentBottom="true"
+    android:textSize="16sp"
+    android:text="완료"/>
+</RelativeLayout>

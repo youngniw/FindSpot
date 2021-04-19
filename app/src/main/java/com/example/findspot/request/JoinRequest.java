@@ -11,14 +11,16 @@ public class JoinRequest extends StringRequest {
     final static private String URL = "http://222.111.4.158/wheremiddle/join.php";       //php파일 연돌을 위한 서버 URL을 설정
     private Map<String, String> userInfo;        //전달할 정보
 
-    public JoinRequest(String userID, String userPW, String gender, String birthYear, Response.Listener<String> listener) {
+    public JoinRequest(String userID, String userPW, String userNickName, String gender, String birthYear, String socialLogin, Response.Listener<String> listener) {
         super(Method.POST, URL, listener, null);
 
         userInfo = new HashMap<>();
         userInfo.put("ID", userID);
         userInfo.put("PW", userPW);
+        userInfo.put("nickName", userNickName);
         userInfo.put("gender", gender);
         userInfo.put("birthYear", birthYear);
+        userInfo.put("socialLogin", socialLogin);
     }
 
     @Override

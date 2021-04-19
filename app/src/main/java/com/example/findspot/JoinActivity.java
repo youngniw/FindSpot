@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 
 public class JoinActivity extends AppCompatActivity {
     String checkedID = "";
+    static String nickName; //********이렇게 해도 되는가?????? (다른 Activity에도 nickName 써줘야 하는데..)
     TextView tv_joinIsCheckedID;
     EditText et_joinID, et_joinPW, et_joinBirthYear;
     Switch sw_joinGender;
@@ -137,12 +138,19 @@ public class JoinActivity extends AppCompatActivity {
                     return;
                 }
 
-                //id중복확인을 하고 값을 모두 입력했다면, 회원가입이 완료되었다고 다이얼로그로 알려주고 확인 버튼 시 로그인 창으로 전환됨
-                try {
-                    new JoinActivity.JoinSubmitTask().execute().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
+                //마지막으로 닉네임 입력받음
+                NickNameCheckDialog nickNameCheckDialog = new NickNameCheckDialog(JoinActivity.this, new NickNameCheckDialog.NickNameCheckDialogListener() {
+                    @Override
+                    public void clickBtn() {    //닉네임 중복확인 완료
+                        //DB에 사용자 계정 추가 요청
+                        try {
+                            new JoinActivity.JoinSubmitTask().execute().get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                nickNameCheckDialog.show();
             }
         });
 
@@ -198,9 +206,9 @@ public class JoinActivity extends AppCompatActivity {
             String gender = "M";
             if (sw_joinGender.isChecked())        //현재 스위치가 on 상태라면 여자인 것이므로 F를 저장함*******************************************(DB에서 확인 필요)
                 gender = "F";
-            String birthYear = et_joinBirthYear.getText().toString();    //태어난 연도값을 가져옴
-
+            String birthYear = et_joinBirthYear.getText().toString();    //태어난 연도값을 가져옴(기본:2021 보여주는데 값은 0임. 문제)
             /**************************************************************닉네임 받아야함***********************************************************************/
+            String userNickName = nickName;
 
             //데이터베이스에 사용자의 ID와 PW와 성별, 그리고 태어난 연도를 저장함으로써 회원가입이 완료되었는 지를 확인
             Response.Listener<String> responseListener = new Response.Listener<String>() {
@@ -218,7 +226,7 @@ public class JoinActivity extends AppCompatActivity {
                 }
             };
             // 서버로 Volley를 이용해서 요청을 함.(확인 요망***********************************************************************************************)
-            JoinRequest joinRequest = new JoinRequest(userID, userPW, gender, birthYear, responseListener);
+            JoinRequest joinRequest = new JoinRequest(userID, userPW, userNickName, gender, birthYear, "0", responseListener);
             RequestQueue queue = Volley.newRequestQueue(JoinActivity.this);         //같아도 가능한가??????
             queue.add(joinRequest);
 
