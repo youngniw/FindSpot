@@ -63,16 +63,6 @@
                 android:layout_height="wrap_content"
                 android:text="임의로 위치 선택" />
 
-            <LinearLayout
-                android:id="@+id/selectwhom_insertNum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="35dp"
-                android:layout_marginRight="35dp"
-                android:orientation="horizontal">
-                <!--"임의로 위치 선택 선택시에 TextView와 EditText가 추가됨"-->
-            </LinearLayout>
-
             <RadioButton
                 android:id="@+id/selectwhom_group"
                 android:layout_width="match_parent"
@@ -82,14 +72,13 @@
 
         </RadioGroup>
 
-        <ListView
-            android:id="@+id/selectwhom_group_list"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectwhom_grouplist_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:transcriptMode="alwaysScroll"
             android:layout_marginLeft="40dp"
-            android:layout_marginTop="10dp"/>
-
+            android:layout_marginTop="10dp" />
     </LinearLayout>
 
     <Button

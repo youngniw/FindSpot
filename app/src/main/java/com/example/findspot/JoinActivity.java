@@ -1,12 +1,12 @@
 package com.example.findspot;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutionException;
 
 public class JoinActivity extends AppCompatActivity {
     String checkedID = "";
-    static String nickName; //********이렇게 해도 되는가?????? (다른 Activity에도 nickName 써줘야 하는데..)
+    static String nickName;     //********이렇게 해도 되는가?????? (다른 Activity에도 nickName 써줘야 하는데..)
     TextView tv_joinIsCheckedID;
     EditText et_joinID, et_joinPW, et_joinBirthYear;
     Switch sw_joinGender;
@@ -109,17 +109,23 @@ public class JoinActivity extends AppCompatActivity {
         btn_id_check.setOnClickListener(new View.OnClickListener() {        //id 중복확인 버튼을 클릭했을 때
             @Override
             public void onClick(View v) {
+                InputMethodManager inputMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);      //키보드 안보이게 하기 위한 InputMethodManager객체 생성
+                inputMM.hideSoftInputFromWindow(et_joinID.getWindowToken(), 0);
+                inputMM.hideSoftInputFromWindow(et_joinPW.getWindowToken(), 0);
+
                 try {
                     new JoinActivity.IDCheckTask().execute().get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
             }
         });
 
         btn_ok.setOnClickListener(new View.OnClickListener() {              //회원가입창의 확인 버튼을 클릭했을 때(회원가입이 완료됨을 알려줌)
             @Override
             public void onClick(View v) {
+                InputMethodManager inputMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);      //키보드 안보이게 하기 위한 InputMethodManager객체 생성
+                inputMM.hideSoftInputFromWindow(et_joinID.getWindowToken(), 0);
+                inputMM.hideSoftInputFromWindow(et_joinPW.getWindowToken(), 0);
+
                 //회원가입을 위해 값을 모두 입력했는지를 확인함
                 if (!checkedID.equals(et_joinID.getText().toString())) {    //ID가 중복확인을 했는지를 점검(중복확인하지 않았다면 회원가입되지 않음)
                     Toast.makeText(getApplicationContext(), "ID 중복 확인을 수행하지 않으셨습니다.\nID 중복 확인해 주세요:)", Toast.LENGTH_SHORT).show();
@@ -145,9 +151,7 @@ public class JoinActivity extends AppCompatActivity {
                         //DB에 사용자 계정 추가 요청
                         try {
                             new JoinActivity.JoinSubmitTask().execute().get();
-                        } catch (InterruptedException | ExecutionException e) {
-                            e.printStackTrace();
-                        }
+                        } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
                     }
                 });
                 nickNameCheckDialog.show();
@@ -157,9 +161,7 @@ public class JoinActivity extends AppCompatActivity {
         btn_cancel.setOnClickListener(new View.OnClickListener() {          //회원가입창의 취소 버튼을 클릭했을 때(로그인 창으로 돌아감)
             @Override
             public void onClick(View v) {
-                Intent it_login = new Intent(JoinActivity.this, LoginActivity.class);
-                startActivity(it_login);
-                finish();
+                finish();       //기존의 로그인 창으로 다시 돌아감(폰의 뒤로가기 버튼 클릭해도 로그인창으로 돌아감)
             }
         });
     }
@@ -198,16 +200,17 @@ public class JoinActivity extends AppCompatActivity {
         }
     }
 
+    //입력한 값들에 대한 회원가입을 위한 작업 수행함
     public class JoinSubmitTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... strings) {
             String userID = et_joinID.getText().toString();     //EditText에 현재 입력된 id값을 가져옴
             String userPW = et_joinPW.getText().toString();     //EditText에 현재 입력된 비밀번호값을 가져옴
             String gender = "M";
-            if (sw_joinGender.isChecked())        //현재 스위치가 on 상태라면 여자인 것이므로 F를 저장함*******************************************(DB에서 확인 필요)
+            if (sw_joinGender.isChecked())      //현재 스위치가 on 상태라면 여자인 것이므로 F를 저장함
                 gender = "F";
-            String birthYear = et_joinBirthYear.getText().toString();    //태어난 연도값을 가져옴(기본:2021 보여주는데 값은 0임. 문제)
-            /**************************************************************닉네임 받아야함***********************************************************************/
+            String birthYear = et_joinBirthYear.getText().toString();
+
             String userNickName = nickName;
 
             //데이터베이스에 사용자의 ID와 PW와 성별, 그리고 태어난 연도를 저장함으로써 회원가입이 완료되었는 지를 확인
@@ -225,9 +228,9 @@ public class JoinActivity extends AppCompatActivity {
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
             };
-            // 서버로 Volley를 이용해서 요청을 함.(확인 요망***********************************************************************************************)
+            // 서버로 Volley를 이용해서 요청을 함
             JoinRequest joinRequest = new JoinRequest(userID, userPW, userNickName, gender, birthYear, "0", responseListener);
-            RequestQueue queue = Volley.newRequestQueue(JoinActivity.this);         //같아도 가능한가??????
+            RequestQueue queue = Volley.newRequestQueue(JoinActivity.this);
             queue.add(joinRequest);
 
             return null;

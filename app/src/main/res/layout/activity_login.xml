@@ -48,19 +48,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp">
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
 
             <TextView
-                android:layout_width="80dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="ID:" />
+                android:text="Email ID:" />
 
             <EditText
                 android:id="@+id/login_ID_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="16sp"
                 android:textColor="#000000" />
 
         </LinearLayout>
@@ -70,11 +72,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp">
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
 
             <TextView
-                android:layout_width="80dp"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
                 android:text="Password:" />
@@ -83,6 +85,8 @@
                 android:id="@+id/login_PW_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:textSize="16sp"
                 android:inputType="textPassword"
                 android:textColor="#000000" />
         </LinearLayout>
@@ -115,6 +119,8 @@
             android:layout_height="1dp"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"
+            android:layout_marginLeft="-20dp"
+            android:layout_marginRight="-20dp"
             android:background="#555555" />
 
         <TextView

@@ -78,9 +78,9 @@ public class NickNameCheckDialog extends Dialog {
                                 params.addRule(RelativeLayout.BELOW, R.id.nickNameDialog_nickname);
                                 params.setMargins(40, 8, 40, 0);
                                 tv_dialogIsCheckedNickName.setLayoutParams(params);
-                            } else {                  //닉네임 사용가능
+                            } else {                //닉네임 사용가능
                                 //context한테 닉네임 전달하고 거기서 DB Insert 해야함
-                                nickName = userNickName;    //JoinActivity에게 userNicName 값 전달
+                                nickName = userNickName;    //JoinActivity에게 userNickName 값 전달
                                 nickNameCheckDialogListener.clickBtn(); //JoinActivity에서 처리할 수 있도록.
                                 dismiss();
                             }
