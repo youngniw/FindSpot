@@ -1,25 +1,16 @@
 package com.example.findspot;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static com.example.findspot.HomeActivity.friendList;
 import static com.example.findspot.HomeActivity.groupList;
 
 public class SelectWhomActivity extends AppCompatActivity {
@@ -65,9 +56,8 @@ public class SelectWhomActivity extends AppCompatActivity {
                     rv_grouplist.addItemDecoration(new DividerItemDecoration(SelectWhomActivity.this, 1)); //리스트 사이의 구분선 설정
 
                     //그룹을 실제로 선택 시에 버튼 setEnabled를 true로 해야함*********************************************************************
-
+                    //****************항목 위치에 따라 그 항목의 그룹이름과 호스트이름으로 그룹에 속한 사람들의 x와 y좌표값을 구할 수 있음(또한 최근에 선택한 위치값도 불러올 수 있음)
                 }
-
             }
         });
     }
@@ -76,7 +66,6 @@ public class SelectWhomActivity extends AppCompatActivity {
         btn_selwhom_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //activity_choice_gps로 화면 이동하고 시간 기준임을 intent로 전달
                 Intent it_choiceGPS = new Intent(SelectWhomActivity.this, ChoiceGPSRandomActivity.class);
 
                 // 넘겨줄 데이터 Bundle 형태로 만들기
@@ -86,7 +75,7 @@ public class SelectWhomActivity extends AppCompatActivity {
                 else
                     extras.putString("standard_tag", "group");      //그룹선택
                 it_choiceGPS.putExtras(extras);
-                startActivity(it_choiceGPS);
+                startActivity(it_choiceGPS);        //위치 선택하는 화면으로 전환
             }
         });
     }

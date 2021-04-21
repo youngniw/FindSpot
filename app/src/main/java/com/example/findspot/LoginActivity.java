@@ -123,7 +123,8 @@ public class LoginActivity extends AppCompatActivity {
                                 JSONObject subJsonObject = jsonArrayGroups.getJSONObject(i);
 
                                 String gName = subJsonObject.getString("gName");                //그룹 이름 받아옴
-                                GroupInfo group = new GroupInfo(gName);
+                                String gHostName = subJsonObject.getString("gHostName");        //그룹 호스트사용자 이름 받아옴(방장)
+                                GroupInfo group = new GroupInfo(gName, gHostName);
 
                                 JSONArray jsonArraygUsers = subJsonObject.getJSONArray("gUsers");  //그룹에 속한 사용자들의 목록을 받아옴
                                 for (int j=0; j < jsonArraygUsers.length(); j++) {

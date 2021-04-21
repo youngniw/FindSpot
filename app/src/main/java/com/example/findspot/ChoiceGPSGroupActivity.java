@@ -28,11 +28,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
 public class ChoiceGPSGroupActivity extends AppCompatActivity {
-    static ArrayList<PositionItem> position_tmp;
+    static ArrayList<PositionItem> position_tmp;    //주소를 받는 타이밍을 겹치지 못하게 순차처리 될 수 있게 하기 위해 사용하는 리스트
 
     Button btn_search_time, btn_search_distance;
     static ArrayList<PositionItem> list_group;  //중간지점을 찾을 결론적 위치 (이름, 도로명주소, 위도, 경도)로 구성된 리스트
-    ArrayList<PositionItem> list_g_users;       //(그룹에 속한 사용자 닉네임, 지정한 위치의 위도,경도)로 구성된 리스트
+    ArrayList<PositionItem> list_g_users;       //(그룹에 속한 사용자 닉네임, 데이터베이스에 저장된 위치의 위도 및 경도)로 구성된 리스트
     PositionGroupListAdapter listAdapter;       //위치 리스트 어댑터(UI 구현)
 
     @Override
@@ -43,10 +43,14 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         position_tmp = new ArrayList<PositionItem>();
 
         list_group = new ArrayList<PositionItem>();
+        list_group.add(new PositionItem("위영은", "수내역", 37.378672170554, 127.11416562491435));
+        list_group.add(new PositionItem("김소은", "솔샘역", 37.62051242223699, 127.01358864212412));
+        list_group.add(new PositionItem("아야여", "잠실역", 37.31345217500308, 126.79569135036883));
+        list_group.add(new PositionItem("헤로우", "숙명여자대학교", 37.54658554768764, 126.96476672491916));
 
         list_g_users = new ArrayList<PositionItem>();
         //**********************************(DB로부터 PositionGroupUserItem를 그룹의 인원수만큼 받아와야함)********************************************************
-        list_g_users.add(new PositionItem("위영은", "수내역", 10.00201203123, 20.2321454135827893));
+        list_g_users.add(new PositionItem("위영은", "수내역", 10.002012031123, 20.2321454135827893));
         list_g_users.add(new PositionItem("김소은", "목내역", 8.00201203123, 30.232124135827893));
         list_g_users.add(new PositionItem("아야여", "금내역", 70.00201203123, 40.232124135827893));
         list_g_users.add(new PositionItem("헤로우", "토내역", 16.00201203123, 50.232124135827893));

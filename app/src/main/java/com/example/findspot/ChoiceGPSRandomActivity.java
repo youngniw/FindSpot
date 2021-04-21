@@ -70,7 +70,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
             }
         });
     }
-
+    //startActivityForResult()에 대한 수신용 메소드
     protected void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -78,7 +78,6 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
             et_position.setText(String.format("%s", address_r));
         }
     }
-
 
     void choice_btn_clickListener() {
         btn_add.setOnClickListener(new View.OnClickListener() { //"추가" 버튼 클릭시,

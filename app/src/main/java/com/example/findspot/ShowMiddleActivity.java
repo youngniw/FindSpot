@@ -1,7 +1,6 @@
 package com.example.findspot;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -16,11 +15,6 @@ import java.util.ArrayList;
 
 import static com.example.findspot.ChoiceGPSRandomActivity.list_random;
 import static com.example.findspot.ChoiceGPSGroupActivity.list_group;
-/*
-추가할 기능
-- 버튼으로 모두 볼수 있도록 줌아웃 //MapView.fitMapViewAreaToShowAllPOIItems()
-- ItemName 누르면 그곳으로 포커스, 4레벨 줌인
- */
 
 public class ShowMiddleActivity extends AppCompatActivity implements MapView.POIItemEventListener {
     ArrayList<PositionItem> list;
