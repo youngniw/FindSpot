@@ -124,7 +124,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
     public class Task extends AsyncTask<String, Void, String> {
         String receiveMsg = "";
 
-        String KAKAO_KEY = "dc90ecf7e13bbcfd5d02a7a41ed33464";  //KAKAO REST API 키
+        String KAKAO_KEY = getString(R.string.kakao_key);  //KAKAO REST API 키
         String auth = "KakaoAK " + KAKAO_KEY;
         URL link = null;
         HttpsURLConnection hc = null;

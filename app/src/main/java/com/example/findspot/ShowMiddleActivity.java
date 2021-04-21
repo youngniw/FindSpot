@@ -54,20 +54,23 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
         mapView.setPOIItemEventListener(this);
 
+        //거리 기준 중간지점 계산히기
+        double avgX = 0.0, avgY = 0.0;
+        for (int i = 0; i < list.size(); i++) {
+            avgX += list.get(i).getLongitude();
+            avgY += list.get(i).getLatitude();
+        }
+        avgX /= list.size();
+        avgY /= list.size();
+
         //시간/거리 기준에 따라 중간지점 보여주기
         String getExtra_standard = getIntent().getStringExtra("standard_tag");
         if (getExtra_standard.equals("time")) { //시간기준일 경우
             //*************************************
             //앞으로 알고리즘 짜야됨
-        } else if (getExtra_standard.equals("distance")) {  //거리기준일 경우
-            double avgX = 0.0, avgY = 0.0;
-            for (int i = 0; i < list.size(); i++) {
-                avgX += list.get(i).getLongitude();
-                avgY += list.get(i).getLatitude();
-            }
-            avgX /= list.size();
-            avgY /= list.size();
+            MiddleTime mt = new MiddleTime(ShowMiddleActivity.this, list.get(0).getLongitude(), list.get(0).getLatitude(), avgX, avgY);
 
+        } else if (getExtra_standard.equals("distance")) {  //거리기준일 경우
             MapPOIItem middle_d = new MapPOIItem();
             middle_d.setItemName("거리 중간지점");   //ping 선택 후 말풍선에 보여질 내용
             middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(avgY, avgX));     //ping 위치 지정

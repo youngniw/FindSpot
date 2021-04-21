@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FindSpot</string>
+    <string name="odsay_key">Fmml9S/S9aj/SPIDlu1uHf6qGftg2yAeTQEon7+Vfds</string>
+    <string name="kakao_key">dc90ecf7e13bbcfd5d02a7a41ed33464</string>
 </resources>

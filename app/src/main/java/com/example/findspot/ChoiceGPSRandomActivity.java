@@ -82,7 +82,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
     void choice_btn_clickListener() {
         btn_add.setOnClickListener(new View.OnClickListener() { //"추가" 버튼 클릭시,
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) {   //"추가" 버튼을 클릭함으로써 위치를 추가하고 싶은 경우
                 String name = et_position.getText().toString();
 
                 //좌표제공API로 위도경도 알아내고, PositionItem에 값 넣기
@@ -138,7 +138,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
     public class Task extends AsyncTask<String, Void, String> {
         String receiveMsg = "";
 
-        String KAKAO_KEY = "dc90ecf7e13bbcfd5d02a7a41ed33464";  //KAKAO REST API 키
+        String KAKAO_KEY = getString(R.string.kakao_key);  //KAKAO REST API 키
         String auth = "KakaoAK " + KAKAO_KEY;
         URL link= null;
         HttpsURLConnection hc = null;
