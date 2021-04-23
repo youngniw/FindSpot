@@ -25,7 +25,7 @@
         <activity android:name=".HomeActivity"></activity>
         <activity android:name=".SelectWhomActivity"></activity>
         <activity android:name=".ChoiceGPSRandomActivity"></activity>
-        <activity android:name=".ChoiceGPSGroupActivity"></activity>
+        <activity android:name=".ChoiceGPSGroupActivity"></activity> <!--ChoiceGPSGroup-->
         <activity android:name=".MyPageActivity"></activity>
         <activity android:name=".FriendActivity"></activity>
         <activity android:name=".GroupActivity"></activity>

@@ -1,6 +1,6 @@
 package com.example.findspot;
 
-//사용자 위치 리스트를 구성하는 아이템 (도로명주소, 위도, 경도를 저장)
+//사용자 위치 리스트를 구성하는 아이템 (닉네임(생략가능), 도로명주소, 위도, 경도를 저장)
 public class PositionItem {
     private String userName = "";
     private String roadName;
