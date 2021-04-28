@@ -4,9 +4,9 @@ import android.content.Context;
 
 import java.util.ArrayList;
 
-public class CandidateTimePosition {
-    int maxIndex = 0;        //(endX, endY)를 위치로 갖는 지점과의 소요시간이 가장 큰 위치의 인덱스 번호
-    int minIndex = 0;        //(endX, endY)를 위치로 갖는 지점과의 소요시간이 가장 작은 위치의 인덱스 번호
+public class CandidateTimePosition implements Comparable<CandidateTimePosition> {
+    int maxIndex = 0;        //(endX, endY)를 위치로 갖는 지점과의 소요시간이 가장 큰 위치의 인덱스 번호      TODO: 안씀
+    int minIndex = 0;        //(endX, endY)를 위치로 갖는 지점과의 소요시간이 가장 작은 위치의 인덱스 번호    TODO: 안씀
     int timeGap = 0;    //소요시간이 제일 큰 위치와 작은 위치의 소요시간 차
     double resultPositionX = 0.0;      //endX값
     double resultPositionY = 0.0;      //endY값
@@ -31,8 +31,23 @@ public class CandidateTimePosition {
         }
         timeGap = maxTime - minTime;
     }
+    CandidateTimePosition () {  //거리상 중간지점을 제외한 소요시간 차가 가장 작은 지하철역을 저장하기 위해 초기 값을 가장 큰 숫자로 해서 추후에 주변 리스트의 값 중 하나가 저장되게 함
+        this.timeGap = Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int compareTo(CandidateTimePosition ctp) {   //timeGap값에 대해 오름차순 정렬이 가능하게 함 TODO: 오름차순인지 확인해야 함
+        if (this.timeGap < ctp.getTimeGap()) {
+            return -1;
+        } else if (this.timeGap > ctp.getTimeGap()) {
+            return 1;
+        }
+        return 0;
+    }
 
     public int getTimeGap() { return timeGap; }
     public int getMaxIndex() { return maxIndex; }
     public int getMinIndex() { return minIndex; }
+    public double getResultPositionX() { return resultPositionX; }
+    public double getResultPositionY() { return resultPositionY; }
 }

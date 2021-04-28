@@ -147,7 +147,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(String response) {
                     try {
-                        //TODO: 코드를 짜야함~~~~~~~~~~~~~~ (사용자들의 정보를 positionItem타입으로 저장하여, list_g_users에 각각의 사용자들의 정보를 추가해야함)
                         JSONObject jsonObject = new JSONObject(response);
 
                         //TODO: 확인 요망
@@ -164,11 +163,11 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                         else    //그룹의 이전 중간 지점 찾기 기록이 없음    TODO: 안보이게 하든지 아예 클릭이 안먹게 하든지 설정
                             tv_applyhistory.setVisibility(View.INVISIBLE);
 
-                        JSONArray members = jsonObject.getJSONArray("members");     //TODO: 내가 이름 변경했으니 확인바람
+                        JSONArray members = jsonObject.getJSONArray("members");
                         for (int i=0; i<members.length(); i++) {    //사용자 정보를 list_g_users에 저장함
                             PositionItem memberInfo = new PositionItem(members.getJSONObject(i).getString("nickName"), members.getJSONObject(i).getString("roadName"),
                                     members.getJSONObject(i).getDouble("x"), members.getJSONObject(i).getDouble("y"));
-                            list_g_users.add(memberInfo);
+                            list_g_users.add(memberInfo);       //TODO: null일때는 추가가 안됨(x와 y값이 없을 시)
                         }
                     } catch (JSONException e) { e.printStackTrace(); }
                 }

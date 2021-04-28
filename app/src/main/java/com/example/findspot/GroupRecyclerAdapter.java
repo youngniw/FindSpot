@@ -36,7 +36,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
 
     @Override
     public void onBindViewHolder(GroupRecyclerAdapter.GroupViewHolder holder, int position) {
-        //**********************************************************확인 필요*******************************************************************************
         holder.grouprow_title.setText(groupList.get(position).getGroupName());       //해당 위치를 인덱스로 한 리스트에 저장된 그룹이름을 텍스트로 설정함
         holder.grouprow_users.setText(String.join(", ", groupList.get(position).getGroupUsers()));      //사용자 이름을 ,을 구분자로 사용하여 출력함(ex. 영은, 소은)
     }
@@ -44,7 +43,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     @Override
     public int getItemCount() {
         //Adapter가 관리하는 전체 데이터 개수 반환
-        return groupList.size();
+        return groupList.size();        //TODO: 문제 발생(NullPointer참조 문제)
     }
 
     public class GroupViewHolder extends RecyclerView.ViewHolder {

@@ -11,7 +11,7 @@ public class StationInfo {
         this.stationY = stationY;
     }
 
+    public String getStation() { return station; }
     public double getStationX() { return stationX; }
     public double getStationY() { return stationY; }
-    public String getStation() { return station; }
 }

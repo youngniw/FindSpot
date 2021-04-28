@@ -110,7 +110,10 @@ public class LoginActivity extends AppCompatActivity {
                         boolean canLogin = jsonObject.getBoolean("canLogin");   //입력한 ID와 PW로 로그인 가능한 지 여부
                         boolean existID = jsonObject.getBoolean("existID");     //입력한 ID값이 DB에 있는지 여부(로그인 안될 시 원인 파악)
                         String nickName = jsonObject.getString("nickName");     //해당 ID의 닉네임을 받음
-                        JSONArray jsonArrayFriends = jsonObject.getJSONArray("friends");    //친구목록을 받아옴
+
+                        if (canLogin) {     //로그인 가능
+                            friendList.clear();     //로그인 시 계속해서 add될 수 있으므로 친구목록 초기화
+                            JSONArray jsonArrayFriends = jsonObject.getJSONArray("friends");    //친구목록을 받아옴
                             for (int i=0; i < jsonArrayFriends.length(); i++) {
                                 JSONObject subJsonObject = jsonArrayFriends.getJSONObject(i);
                                 String fName = subJsonObject.getString("fName");
@@ -118,7 +121,8 @@ public class LoginActivity extends AppCompatActivity {
                                 friendList.add(fName);      //사용자의 친구목록인 friendlist에 추가함
                             }
 
-                        JSONArray jsonArrayGroups = jsonObject.getJSONArray("groups");      //사용자가 속한 그룹목록을 받아옴
+                            groupList.clear();      //로그인 시 계속해서 add될 수 있으므로 그룹목록 초기화
+                            JSONArray jsonArrayGroups = jsonObject.getJSONArray("groups");      //사용자가 속한 그룹목록을 받아옴
                             for (int i=0; i < jsonArrayGroups.length(); i++) {
                                 JSONObject subJsonObject = jsonArrayGroups.getJSONObject(i);
 
@@ -135,7 +139,6 @@ public class LoginActivity extends AppCompatActivity {
                                 groupList.add(group);      //사용자가 포함된 그룹목록인 grouplist에 추가함
                             }
 
-                        if (canLogin) {     //로그인 가능
                             Toast.makeText(getApplicationContext(), nickName+"님 환영합니다:)", Toast.LENGTH_SHORT).show();
                             Intent it_home = new Intent(LoginActivity.this, HomeActivity.class);        //홈화면으로 화면이 전환됨
                             startActivity(it_home);     //로그인이 가능하므로 Home창으로 넘어감
