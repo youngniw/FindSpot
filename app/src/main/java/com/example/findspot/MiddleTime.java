@@ -33,7 +33,6 @@ public class MiddleTime {
                     if (api == API.SEARCH_PUB_TRANS_PATH) {
                         JSONObject optimal_route = odsayData.getJson().getJSONObject("result").getJSONArray("path").getJSONObject(0);
                         totalTime = optimal_route.getJSONObject("info").getInt("totalTime");
-                        Log.i("currentMT", String.valueOf(totalTime));
 
                         result.getMt().add(totalTime);
 
