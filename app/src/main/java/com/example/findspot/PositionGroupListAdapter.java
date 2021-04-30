@@ -3,6 +3,7 @@ package com.example.findspot;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +15,14 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import static com.example.findspot.ChoiceGPSGroupActivity.list_group;
+import static com.example.findspot.SelectWhomActivity.list_g_users;
 
 //그룹에서 각각의 사용자 위치 리스트를 UI로 나타내기 위한 어댑터
 public class PositionGroupListAdapter extends BaseAdapter {
     Context context;
     LayoutInflater inflater;
     int layout;
-    ArrayList<PositionItem> src_group;
+    ArrayList<PositionItem> src_group;      //그룹에 속한 사용자들의 최종적 위치가 저장됨(사용자 정보)
 
     public PositionGroupListAdapter(Context context, int layout, ArrayList<PositionItem> src_group) {
         this.context = context;
@@ -53,9 +55,9 @@ public class PositionGroupListAdapter extends BaseAdapter {
         EditText et_inputPosition = (EditText)convertView.findViewById(R.id.positionrow_g_et_inputPosition);
 
         //위치를 선택해 저장했다면, 해당 내용이 리스트뷰에 보여
-        for (int i = 0 ; i < list_group.size(); i++) {
-            if (list_group.get(i).getUserName().equals(getItem(pos).getUserName())) {
-                et_inputPosition.setText(list_group.get(i).getRoadName());
+        for (PositionItem pi : src_group) {
+            if (pi.getUserName().equals(getItem(pos).getUserName())) {
+                et_inputPosition.setText(pi.getRoadName());
                 break;
             }
         }
@@ -67,18 +69,10 @@ public class PositionGroupListAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 //PositionItem 생성(저장된 정보로 설정함)
-                PositionItem item = new PositionItem(getItem(pos).getUserName(), getItem(pos).getRoadName(), getItem(pos).getLatitude(), getItem(pos).getLongitude());
+                PositionItem item = new PositionItem(list_g_users.get(pos).getUserName(), list_g_users.get(pos).getRoadName(), list_g_users.get(pos).getLatitude(), list_g_users.get(pos).getLongitude());
 
-                //이미 한번 위치를 추가한 적이 있다면 바꾸고, 아니라면 위치 결과들을 모아놓은 list_group에 추가함
-                boolean ischange_flag = false;
-                for (int i = 0 ; i < list_group.size(); i++) {
-                    if (list_group.get(i).getUserName().equals(getItem(pos).getUserName())) {
-                        list_group.set(i, item);
-                        ischange_flag = true;
-                        break;
-                    }
-                }
-                if (!ischange_flag) list_group.add(item);
+                if (list_group.get(pos).getUserName().equals(list_g_users.get(pos).getUserName()))
+                    list_group.set(pos, item);
 
                 EditText et_group_position = (EditText) finalConvertView.findViewById(R.id.positionrow_g_et_inputPosition);
                 et_group_position.setText(getItem(pos).getRoadName());

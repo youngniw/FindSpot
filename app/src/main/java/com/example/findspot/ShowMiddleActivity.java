@@ -33,6 +33,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     ArrayList<PositionItem> list;   //실제 중간지점을 찾을 사람들의 설정 위치 등의 정보
     StationInfo currentStation;     //거리상 중간지점과 가장 가까운 지하철역 정보(고정됨)
     ArrayList<StationInfo> nearStationList;     //현재 기준이 되는 지하철역의 반경 _km 내에 있는 지하철역 리스트(가변적)
+    ArrayList<CandidateTimePosition> resultTPositions;  //소요시간 최대 및 최소 오차가 10 이하인 역들
+    ArrayList<CandidateTimePosition> searchTPositions;  //(더 조사해야하는 역들)
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,6 +52,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 mapView.fitMapViewAreaToShowAllPOIItems();
             }
         });
+
 
         //이전 Activity에 따라 사용할 list 설정
         String getExtra_activity = getIntent().getStringExtra("activity_tag");
@@ -73,16 +76,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         //거리 기준 중간지점 계산히기
         double avgX = 0.0, avgY = 0.0;
 
-        for (PositionItem pi : list) {      //TODO: for문 바꿨으니 확인바람
+        for (PositionItem pi : list) {
             avgX += pi.getLongitude();
             avgY += pi.getLatitude();
         }
-        /*
-        for (int i = 0; i < list.size(); i++) {
-            avgX += list.get(i).getLongitude();
-            avgY += list.get(i).getLatitude();
-        }
-         */
         avgX /= list.size();
         avgY /= list.size();
 
@@ -90,85 +87,27 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         String getExtra_standard = getIntent().getStringExtra("standard_tag");
         if (getExtra_standard.equals("time")) {       //시간기준일 경우
             nearStationList = new ArrayList<StationInfo>();     //현재 기준이 되는 지하철역의 반경 내의 지하철 역 리스트
-            ArrayList<CandidateTimePosition> searchTPositions = new ArrayList<>();    //현재 기준이 되는 지하철역보다 시간 오차가 작은 지하철역들을 저장(더 조사해야하는 역들)
-            ArrayList<CandidateTimePosition> resultTPositions = new ArrayList<>();    //찾아본 지하철역 중 시간 오차가 10보다 작거나 같은 지하철역들이 저장됨
+            searchTPositions = new ArrayList<>();    //현재 기준이 되는 지하철역보다 시간 오차가 작은 지하철역들을 저장(더 조사해야하는 역들)
+            resultTPositions = new ArrayList<>();    //찾아본 지하철역 중 시간 오차가 10보다 작거나 같은 지하철역들이 저장됨
 
             //TODO: 앞으로 알고리즘 짜야됨
-
-            GetStationThread getStationThread = new GetStationThread(true, avgX, avgY, 2);
-            getStationThread.start();
-            try {
-                getStationThread.join();
-            } catch (InterruptedException e) { e.printStackTrace(); }
-            /*
             try {   //(avgX와 avgY)와 가까운 지하철 역과 그 역의 반경 2km내의 지하철 역 리스트를 요청 및 전달받음
                 new ShowMiddleActivity.GetStationTask(true, avgX, avgY, 2).execute().get();
             } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
+            //위의 try문을 통해 지하철 역과 지하철 역 리스트
+            /*
+            Thread syncThread = new Thread();
+            syncThread.start();
+            try {
+                syncThread.join();
+            } catch (InterruptedException e) { e.printStackTrace(); }
+
              */
-            //TODO: 싱크를 맞춰야함. try문을 수행해 response를 받기 전에 아래의 코드를 수행하기에 nullPointer오류가 발생함
-            CandidateTimePosition current = new CandidateTimePosition(this, list, currentStation.getStationX(), currentStation.getStationY());  //거리 상 중간지점(초기 기준 위치)과 가장 가까운 지하철역의 사용자들 소요시간 정보 저장(가변적)
-            CandidateTimePosition minTimeGapS = new CandidateTimePosition();   //이후에 주변역들 중 소요시간 최소인 곳을 저장함
 
-            if (current.getTimeGap() <= 10)  //거리상 중간 지점의 사용자들의 소요 시간 오차가 10보다 작은 경우
-                resultTPositions.add(current);       //결과 후보 중에 하나로 저장함
+            //response에서 조사를 하는 함수를 호출함
+            //후보 3개까지 나오고 모든 수행은 search함수에서 함
 
-            for (StationInfo nearS : nearStationList) {     //거리상 중간지점과 가장 가까운 역을 중심으로 반경 2km이내에 있는 역에 대해 (TODO: for문 바꿨으니 확인바람)
-                CandidateTimePosition tmpStation = new CandidateTimePosition(this, list, nearS.getStationX(), nearS.getStationY());
-
-                if (tmpStation.getTimeGap() < minTimeGapS.getTimeGap())
-                    minTimeGapS = tmpStation;   //주변 역들 중 소요시간 최소로 저장함
-
-                if (tmpStation.getTimeGap() <= 10) { //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
-                    resultTPositions.add(tmpStation);   //10보다 작거나 같으므로 결과 후보로 추가
-                    searchTPositions.add(tmpStation);   //이후에 이 tmpStation역을 중심으로 반경 내에 이 역보다 최대/최소 소요시간의 차가 더 작은 역이 있을 수 있으므로 검색후보로 추가
-                }
-                else if (tmpStation.getTimeGap() < current.getTimeGap())
-                    searchTPositions.add(tmpStation);   //거리기준 중간지점역보다 소요시간 오차가 더 작으므로 결과 후보는 아니더라도 기준 검색 후보로 추가됨
-            }
-
-            //주변 역들의 소요시간 차가 10보다 크고, 거리상 중간지점보다 큰 경우(주변 역들 중 가장 소요시간 차가 작았던 지하철역을 중심으로 다시 조사함)
-            if (searchTPositions.size()==0 && nearStationList.size()!=0) {
-                //minTimeGapS를 중심으로 다시 반경 2km내에 주변 지하철 역을 조사함(try문을 다시 써야함)
-                //TODO: 이 코드 역시 동기를 맞춰야함
-                GetStationThread getStationThread2 = new GetStationThread(false, minTimeGapS.getResultPositionX(), minTimeGapS.getResultPositionY(), 2);
-                getStationThread2.start();
-                try {
-                    getStationThread2.join();
-                } catch (InterruptedException e) { e.printStackTrace(); }
-
-                //minTimGapS를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
-                for (StationInfo nextNearS : nearStationList) {     //TODO: for문 바꿨으니 확인바람
-                    CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, list, nextNearS.getStationX(), nextNearS.getStationY());
-
-                    if (tmpStationIn.getTimeGap() <= 10)    //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
-                        resultTPositions.add(tmpStationIn);   //10보다 작거나 같으므로 결과 후보로 추가
-                }
-            }
-            else {      //조사할 대상 리스트에 지하철 역이 포함되어 있는 경우(TODO: for문 바꿨으니 확인바람)
-                for (CandidateTimePosition searchS : searchTPositions) {    //조사할 대상 리스트에 포함된 지역을 중심으로 하여 반경 2km이내의 지하철 역을 조사함
-                    current = searchS;
-
-                    //TODO: 이 코드 역시 동기를 맞춰야함
-                    GetStationThread getStationThread3 = new GetStationThread(false, current.getResultPositionX(), current.getResultPositionY(), 2);
-                    getStationThread3.start();
-                    try {
-                        getStationThread3.join();
-                    } catch (InterruptedException e) { e.printStackTrace(); }
-
-                    //current(조사 대상 리스트의 지하철 역 중 하나)를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
-                    for (StationInfo nextNearS : nearStationList) {     //TODO: for문 바꿨으니 확인바람
-                        CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, list, nextNearS.getStationX(), nextNearS.getStationY());
-
-                        if (tmpStationIn.getTimeGap() <= 10)    //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
-                            resultTPositions.add(tmpStationIn);   //10보다 작거나 같으므로 결과 후보로 추가
-                    }
-                }
-            }
-
-            //resultTPositions리스트에 최대 및 최소 소요시간의 오차가 10보다 작거나 같은 지하철 역들이 포함됨(TODO: 추가 코드 필요)
-            Collections.sort(resultTPositions);     //오름차순 정렬함
-            //TODO: 출력되게 함
 
                 /*
                 //콜백함수의 순서가 달라질 수 있으므로 (endX, endY)와의 직선거리를 저장함
@@ -218,7 +157,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     @Override
     public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) { }
 
-    /*
+
     //입력한 값들에 대한 회원가입을 위한 작업 수행함
     public class GetStationTask extends AsyncTask<String, Void, String> {
         boolean isDistanceMiddle;
@@ -258,6 +197,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                             StationInfo nearStation = new StationInfo(nearStationName, nearX, nearY);
                             nearStationList.add(nearStation);
                         }
+                        //TODO: 서버에서 처음이라고 할 시에만 search()를 수행함
+                        if (jsonObject.getBoolean("isDistanceMiddle"))
+                            search();   //받은 지하철 역들에 대한 소요시간을 구해 최적화된 중간지점을 찾음
+
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
             };
@@ -268,56 +211,76 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
             return null;
         }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-        }
     }
-    */
-    public class GetStationThread extends Thread {
-        boolean isDistanceMiddle = true;
-        double x = 0.0;
-        double y = 0.0;
-        int radius = 0;
 
-        GetStationThread(boolean isDistanceMiddle, double x, double y, int radius) {
-            this.isDistanceMiddle = isDistanceMiddle;
-            this.x = x;
-            this.y = y;
-            this.radius = radius;
+    public void search() {
+        CandidateTimePosition current = new CandidateTimePosition(this, list, currentStation.getStationX(), currentStation.getStationY());  //거리 상 중간지점(초기 기준 위치)과 가장 가까운 지하철역의 사용자들 소요시간 정보 저장(가변적)
+        CandidateTimePosition minTimeGapS = new CandidateTimePosition();   //이후에 주변역들 중 소요시간 최소인 곳을 저장함
+
+        Log.i("current", String.valueOf(current.getTimeGap()));     //TODO: 싱크 맞춰줘야함(timeGap값이 0이란다....)
+
+        /*
+        if (current.getTimeGap() <= 10)  //거리상 중간 지점의 사용자들의 소요 시간 오차가 10보다 작은 경우
+            resultTPositions.add(current);       //결과 후보 중에 하나로 저장함
+
+        for (StationInfo nearS : nearStationList) {     //거리상 중간지점과 가장 가까운 역을 중심으로 반경 2km이내에 있는 역에 대해 (TODO: for문 바꿨으니 확인바람)
+            CandidateTimePosition tmpStation = new CandidateTimePosition(this, list, nearS.getStationX(), nearS.getStationY());
+            Log.i("station", String.valueOf(tmpStation.getTimeGap()));
+
+            if (tmpStation.getTimeGap() < minTimeGapS.getTimeGap())
+                minTimeGapS = tmpStation;   //주변 역들 중 소요시간 최소로 저장함
+
+            if (tmpStation.getTimeGap() <= 10) { //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
+                resultTPositions.add(tmpStation);   //10보다 작거나 같으므로 결과 후보로 추가
+                searchTPositions.add(tmpStation);   //이후에 이 tmpStation역을 중심으로 반경 내에 이 역보다 최대/최소 소요시간의 차가 더 작은 역이 있을 수 있으므로 검색후보로 추가
+            }
+            else if (tmpStation.getTimeGap() < current.getTimeGap())
+                searchTPositions.add(tmpStation);   //거리기준 중간지점역보다 소요시간 오차가 더 작으므로 결과 후보는 아니더라도 기준 검색 후보로 추가됨
         }
 
-        @Override
-        public void run() {
-            //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);       //중간지점 가장 근처의 가까운 역과 그 역 반경 1km이내의 지하철 역 정보를 받음
-                        //중간 지점과 가장 가까운 역 정보 저장
-                        String simularStationName = jsonObject.getJSONObject("simularStation").getString("station");
-                        double simularX = jsonObject.getJSONObject("simularStation").getDouble("x");
-                        double simularY = jsonObject.getJSONObject("simularStation").getDouble("y");
-                        currentStation = new StationInfo(simularStationName, simularX, simularY);
+        for (CandidateTimePosition i : searchTPositions)
+            Log.i("stationIn", String.valueOf(i.getTimeGap()));
 
-                        //중간 지점과 가장 가까운 근처 반경이내의 역 정보 리스트에 저장
-                        JSONArray nearStationArray = jsonObject.getJSONArray("nearStation");
-                        for (int i=0; i<nearStationArray.length(); i++) {
-                            String nearStationName = nearStationArray.getJSONObject(i).getString("station");
-                            double nearX = nearStationArray.getJSONObject(i).getDouble("x");
-                            double nearY = nearStationArray.getJSONObject(i).getDouble("y");
-                            StationInfo nearStation = new StationInfo(nearStationName, nearX, nearY);
-                            nearStationList.add(nearStation);
-                        }
-                    } catch (JSONException e) { e.printStackTrace(); }
+
+        //주변 역들의 소요시간 차가 10보다 크고, 거리상 중간지점보다 큰 경우(주변 역들 중 가장 소요시간 차가 작았던 지하철역을 중심으로 다시 조사함)
+        if (searchTPositions.size()==0 && nearStationList.size()!=0) {
+            //minTimeGapS를 중심으로 다시 반경 2km내에 주변 지하철 역을 조사함(try문을 다시 써야함)
+            //TODO: 이 코드 역시 동기를 맞춰야함
+            try {
+                new ShowMiddleActivity.GetStationTask(false, minTimeGapS.getResultPositionX(), minTimeGapS.getResultPositionY(), 2).execute().get();
+            } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
+
+            //minTimGapS를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
+            for (StationInfo nextNearS : nearStationList) {     //TODO: for문 바꿨으니 확인바람
+                CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, list, nextNearS.getStationX(), nextNearS.getStationY());
+
+                if (tmpStationIn.getTimeGap() <= 10)    //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
+                    resultTPositions.add(tmpStationIn);   //10보다 작거나 같으므로 결과 후보로 추가
+            }
+        }
+        else {      //조사할 대상 리스트에 지하철 역이 포함되어 있는 경우(TODO: for문 바꿨으니 확인바람)
+            for (CandidateTimePosition searchS : searchTPositions) {    //조사할 대상 리스트에 포함된 지역을 중심으로 하여 반경 2km이내의 지하철 역을 조사함
+                current = searchS;
+
+                //TODO: 이 코드 역시 동기를 맞춰야함
+                try {
+                    new GetStationTask(false, current.getResultPositionX(), current.getResultPositionY(), 2).execute().get();
+                } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
+
+                //current(조사 대상 리스트의 지하철 역 중 하나)를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
+                for (StationInfo nextNearS : nearStationList) {     //TODO: for문 바꿨으니 확인바람
+                    CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, list, nextNearS.getStationX(), nextNearS.getStationY());
+
+                    if (tmpStationIn.getTimeGap() <= 10)    //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
+                        resultTPositions.add(tmpStationIn);   //10보다 작거나 같으므로 결과 후보로 추가
                 }
-            };
-            // 서버로 Volley를 이용해서 요청을 함
-            GetTimeMiddleRequest getMiddleRequest = new GetTimeMiddleRequest(isDistanceMiddle, String.valueOf(x), String.valueOf(y), 2, responseListener);    //반경을 1km로 줌
-            RequestQueue queue = Volley.newRequestQueue(ShowMiddleActivity.this);
-            queue.add(getMiddleRequest);
+            }
         }
+
+         */
+
+        //resultTPositions리스트에 최대 및 최소 소요시간의 오차가 10보다 작거나 같은 지하철 역들이 포함됨(TODO: 추가 코드 필요)
+        Collections.sort(resultTPositions);     //오름차순 정렬함
+        //TODO: 출력되게 함
     }
 }

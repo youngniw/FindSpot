@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class MiddleTime {
     private int totalTime = 0;
 
-    MiddleTime(Context context, double startX, double startY, double endX, double endY) {
+    MiddleTime(Context context, final CandidateTimePosition result, double startX, double startY, double endX, double endY) {
         ODsayService odsayService = ODsayService.init(context, context.getString(R.string.odsay_key));      //key값을 통해 ODsayService 객체 생성
 
         odsayService.setReadTimeout(5000);          //서버 연결 제한시간 5초로 설정
@@ -33,6 +33,12 @@ public class MiddleTime {
                     if (api == API.SEARCH_PUB_TRANS_PATH) {
                         JSONObject optimal_route = odsayData.getJson().getJSONObject("result").getJSONArray("path").getJSONObject(0);
                         totalTime = optimal_route.getJSONObject("info").getInt("totalTime");
+                        Log.i("currentMT", String.valueOf(totalTime));
+
+                        result.getMt().add(totalTime);
+
+                        if (result.getMt().size() == result.getSize())
+                            result.calTimeGap();    //모든 사용자의 소요시간을 구했으므로, 최대 소요시간 차이 등 계산을 수행함
                     }
                 } catch (JSONException e) { e.printStackTrace(); }
             }

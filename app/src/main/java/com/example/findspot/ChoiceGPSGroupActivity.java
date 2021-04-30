@@ -8,13 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.toolbox.Volley;
-import com.example.findspot.request.GroupInfoRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +29,8 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
-import static com.example.findspot.SelectWhomActivity.selectedGroup;
+import static com.example.findspot.SelectWhomActivity.ghistory;
+import static com.example.findspot.SelectWhomActivity.list_g_users;
 
 public class ChoiceGPSGroupActivity extends AppCompatActivity {
     static ArrayList<PositionItem> position_tmp;    //주소를 받는 타이밍을 겹치지 못하게 순차처리 될 수 있게 하기 위해 사용하는 리스트
@@ -42,44 +39,31 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
     TextView tv_applyhistory;
     Button btn_search_time, btn_search_distance;
 
-    ArrayList<PositionItem> list_g_users;       //(그룹에 속한 사용자 닉네임, 데이터베이스에 저장된 위치의 위도 및 경도)로 구성된 리스트
     PositionGroupListAdapter listAdapter;       //위치 리스트 어댑터(UI 구현)
-    ArrayList<String> ghistory;     //이전에 해당 그룹이 중간지점을 찾았다면 그에 대한 정보(인덱스 순서대로 중간지점을 시간(T)기준인지 거리(D)기준인지, 경도, 위도, 도로명)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choice_gps_group);
 
-        ghistory = new ArrayList<>();
+        String getExtraH = getIntent().getStringExtra("history");
+
         position_tmp = new ArrayList<PositionItem>();
-
         list_group = new ArrayList<PositionItem>();
-        list_group.add(new PositionItem("위영은", "수내역", 37.378672170554, 127.11416562491435));
-        list_group.add(new PositionItem("김소은", "솔샘역", 37.62051242223699, 127.01358864212412));
-        list_group.add(new PositionItem("아야여", "잠실역", 37.31345217500308, 126.79569135036883));
-        list_group.add(new PositionItem("헤로우", "숙명여자대학교", 37.54658554768764, 126.96476672491916));
-
-        list_g_users = new ArrayList<PositionItem>();
-
-        //**********************************(DB로부터 PositionGroupUserItem를 그룹의 인원수만큼 받아와야함)********************************************************
-        //TODO: 앞으로 알고리즘 짜야됨
-        try {
-            new ChoiceGPSGroupActivity.GetGroupInfoTask().execute().get();      //DB로부터 그룹의 속한 사용자들의 닉네임, 도로명, 지정한 x, y값을 받아옴, 또한 최근에 찾은 위치를 불러옴
-        } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
-
-        //TODO: 위에 짜면 이 부분은 삭제:)
-        list_g_users.add(new PositionItem("위영은", "수내역", 10.002012031123, 20.2321454135827893));
-        list_g_users.add(new PositionItem("김소은", "목내역", 8.00201203123, 30.232124135827893));
-        list_g_users.add(new PositionItem("아야여", "금내역", 70.00201203123, 40.232124135827893));
-        list_g_users.add(new PositionItem("헤로우", "토내역", 16.00201203123, 50.232124135827893));
+        for (PositionItem pi : list_g_users) {
+            list_group.add(new PositionItem(pi.getUserName(), "", 0.0, 0.0));
+        }
 
         //위치 기록을 위한 그룹 리스트 초기설정
-        listAdapter = new PositionGroupListAdapter(this, R.layout.positionrow_group, list_g_users);
+        listAdapter = new PositionGroupListAdapter(this, R.layout.positionrow_group, list_group);
         ListView lv = (ListView) findViewById(R.id.choice_gps_g_lv_position);
         lv.setAdapter(listAdapter);
 
-        tv_applyhistory = findViewById(R.id.choice_gps_g_applyhistory);     //최근 기록 불러오기
+        tv_applyhistory = findViewById(R.id.choice_gps_g_applyhistory);     //최근 기록을 볼 수 있는 지 tv 보여줌
+            if (getExtraH.equals("noHistory"))
+                tv_applyhistory.setVisibility(View.INVISIBLE);
+            else
+                tv_applyhistory.setText(getExtraH);     //최근 기록 확인 [시간/거리 기준]  >>
         btn_search_time = (Button) findViewById(R.id.choice_gps_g_bt_time);
         btn_search_distance = (Button) findViewById(R.id.choice_gps_g_bt_distance);
 
@@ -116,12 +100,23 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         btn_search_time.setOnClickListener(new View.OnClickListener() { //"시간 기준" 버튼 클릭시,
             @Override
             public void onClick(View v) {
-                //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
-                Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
-                it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
-                startActivity(it_showmiddle);
-                //TODO: DB에 최근으로 중간 지점 위치 전달하기
+                boolean isNext = true;
+                for (PositionItem pi : list_group) {
+                    if (pi.getRoadName().equals("")) {      //입력한 도로명이 없을 시
+                        isNext = false;
+                        Toast.makeText(getApplicationContext(), "입력하지 않은 위치가 있습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
+
+                if (isNext) {       //다음 화면으로 넘어갈 수 있음
+                    //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
+                    Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
+                    it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
+                    it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                    startActivity(it_showmiddle);
+                    //TODO: DB에 최근으로 중간 지점 위치 전달하기
+                }
             }
         });
 
@@ -138,50 +133,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         });
     }
 
-    //그룹에 속한 사용자 정보를 받고 이 그룹에서 이전에 중간지점을 찾은 기록을 얻기 위한 작업 수행함
-    public class GetGroupInfoTask extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            //데이터베이스에 그룹에 속한 사용자의 정보(닉네임, 도로명, 경도, 위도)와 최근에 찾은 위치를 얻음
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-
-                        //TODO: 확인 요망
-                        if (jsonObject.getJSONObject("group").getString("historyTF").equals("T")) {     //이전에 이 그룹에서 중간 지점 찾기를 했었음(기록이 있음)
-                            ghistory.add(jsonObject.getJSONObject("group").getString("standard"));  //시간(T) or 거리(D) 기준
-                                if (jsonObject.getJSONObject("group").getString("standard").equals("T"))    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때
-                                    tv_applyhistory.setText("최근 기록 확인 [시간 기준]  >>");
-                                else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때
-                                    tv_applyhistory.setText("최근 기록 확인 [거리 기준]  >>");
-                            ghistory.add(String.valueOf(jsonObject.getJSONObject("group").getDouble("x")));     //최근 중간지점의 경도
-                            ghistory.add(String.valueOf(jsonObject.getJSONObject("group").getDouble("y")));     //최근 중간지점의 위도
-                            ghistory.add(jsonObject.getJSONObject("group").getString("roadName"));      //최근 중간지점의 도로명주로
-                        }
-                        else    //그룹의 이전 중간 지점 찾기 기록이 없음    TODO: 안보이게 하든지 아예 클릭이 안먹게 하든지 설정
-                            tv_applyhistory.setVisibility(View.INVISIBLE);
-
-                        JSONArray members = jsonObject.getJSONArray("members");
-                        for (int i=0; i<members.length(); i++) {    //사용자 정보를 list_g_users에 저장함
-                            PositionItem memberInfo = new PositionItem(members.getJSONObject(i).getString("nickName"), members.getJSONObject(i).getString("roadName"),
-                                    members.getJSONObject(i).getDouble("x"), members.getJSONObject(i).getDouble("y"));
-                            list_g_users.add(memberInfo);       //TODO: null일때는 추가가 안됨(x와 y값이 없을 시)
-                        }
-                    } catch (JSONException e) { e.printStackTrace(); }
-                }
-            };
-
-            //서버로 Volley를 이용해서 요청을 함.(그룹에 속한 사용자들의 정보를 받기 위한 전달)
-            GroupInfoRequest gUserInfoRequest = new GroupInfoRequest(selectedGroup, responseListener);
-            RequestQueue queue = Volley.newRequestQueue(ChoiceGPSGroupActivity.this);
-            queue.add(gUserInfoRequest);
-
-            return null;
-        }
-    }
-
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == 101 && resultCode == 1) {
@@ -196,16 +147,12 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
             position_tmp.get(0).setLongitude(Double.parseDouble(resultXY[0]));
             position_tmp.get(0).setLatitude(Double.parseDouble(resultXY[1]));
 
-            //이미 한번 위치를 추가한 적이 있다면 바꾸고, 아니라면 위치 결과들을 모아놓은 list_group에 추가함
-            boolean ischange_flag = false;
             for (int i = 0 ; i < list_group.size(); i++) {
                 if (list_group.get(i).getUserName().equals(position_tmp.get(0).getUserName())) {
                     list_group.set(i, position_tmp.get(0));
-                    ischange_flag = true;
                     break;
                 }
             }
-            if (!ischange_flag) list_group.add(position_tmp.get(0));
 
             position_tmp.remove(0); //0번째 아이템 삭제
             listAdapter.notifyDataSetChanged();     //리스트 갱신
