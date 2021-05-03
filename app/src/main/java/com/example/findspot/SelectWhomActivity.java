@@ -29,7 +29,7 @@ import static com.example.findspot.HomeActivity.groupList;
 public class SelectWhomActivity extends AppCompatActivity {
     static Button btn_selwhom_next;
     static GroupInfo selectedGroup;     //SelectWhomActivity에서 선택한 그룹에 속한 사용자 닉네임 정보
-    static ArrayList<String> ghistory;     //이전에 해당 그룹이 중간지점을 찾았다면 그에 대한 정보(인덱스 순서대로 중간지점을 시간(T)기준인지 거리(D)기준인지, 위도, 경도, 도로명)
+    static GHistoryInfo ghistory;     //이전에 해당 그룹이 중간지점을 찾았다면 그에 대한 정보(중간지점을 시간(T)기준인지 거리(D)기준인지, 경도x, 위도y, 사용자의 선택 위치정보)
     static ArrayList<PositionItem> list_g_users;       //(그룹에 속한 사용자 닉네임, 데이터베이스에 저장된 위치의 위도 및 경도)로 구성된 리스트
 
     Bundle extras;
@@ -42,7 +42,7 @@ public class SelectWhomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selectwhom);
 
-        ghistory = new ArrayList<String>();
+        ghistory = new GHistoryInfo();
         list_g_users = new ArrayList<PositionItem>();
 
         rg_selwhom_radiogroup = (RadioGroup) findViewById(R.id.selectwhom_radiogroup);
@@ -94,7 +94,6 @@ public class SelectWhomActivity extends AppCompatActivity {
                     it_choiceGPSR.putExtras(extras);
                     startActivity(it_choiceGPSR);        //랜덤하게 위치 선택하는 화면으로 전환
                 }
-
                 else {
                     try {
                         new SelectWhomActivity.GetGroupInfoTask().execute().get();      //DB로부터 그룹의 속한 사용자들의 닉네임, 도로명, 지정한 x, y값을 받아옴, 또한 최근에 찾은 위치를 불러옴
@@ -116,25 +115,45 @@ public class SelectWhomActivity extends AppCompatActivity {
                         list_g_users.clear();
                         JSONObject jsonObject = new JSONObject(response);
 
-                        //TODO: 확인 요망
-                        if (jsonObject.getJSONObject("group").getString("historyTF").equals("T")) {     //이전에 이 그룹에서 중간 지점 찾기를 했었음(기록이 있음)
-                            ghistory.add(jsonObject.getJSONObject("group").getString("standard"));  //시간(T) or 거리(D) 기준
-                            if (jsonObject.getJSONObject("group").getString("standard").equals("T"))    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때
+                        //이전에 이 그룹에서 중간 지점 찾기를 한 기록이 있는 지 여부에 따른 수행(기록이 있음-> TRUE)
+                        JSONObject groupObject = jsonObject.getJSONObject("group");
+                        if (groupObject.getBoolean("historyTF")) {
+                            ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
+                            if (groupObject.getString("standard").equals("T")) {    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때(T)
                                 extras.putString("history", "최근 기록 확인 [시간 기준]  >>");      //기록 전달
-                            else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때
+                                //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
+                                JSONArray hisStations = groupObject.getJSONArray("hisStations");        //TODO: 확인바람!!!!!!!!!!!!!!
+                                for (int i=0; i<hisStations.length(); i++) {
+                                    ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"),
+                                            hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
+                                }
+                            }
+                            else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때(D)
                                 extras.putString("history", "최근 기록 확인 [거리 기준]  >>");      //기록 전달
-                            ghistory.add(String.valueOf(jsonObject.getJSONObject("group").getDouble("y")));     //최근 중간지점의 위도
-                            ghistory.add(String.valueOf(jsonObject.getJSONObject("group").getDouble("x")));     //최근 중간지점의 경도
-                            ghistory.add(jsonObject.getJSONObject("group").getString("roadName"));      //최근 중간지점의 도로명주로
+                            ghistory.setWhereX(groupObject.getDouble("x"));     //최근 중간지점의 경도
+                            ghistory.setWhereY(groupObject.getDouble("y"));     //최근 중간지점의 위도
+                            JSONArray usersPick = groupObject.getJSONArray("usersPick");
+                            for (int i=0; i<usersPick.length(); i++) {      //history의 중간지점에 대한 사용자들의 위치 선택 정보
+                                ghistory.getUsersPick().add(new PositionItem(usersPick.getJSONObject(i).getString("nickName"), "",
+                                        usersPick.getJSONObject(i).getDouble("y"), usersPick.getJSONObject(i).getDouble("x")));
+                            }
                         }
                         else
                             extras.putString("history", "noHistory");      //기록 전달(보여주지 마라!)
 
                         JSONArray members = jsonObject.getJSONArray("members");
                         for (int i=0; i<members.length(); i++) {    //사용자 정보를 list_g_users에 저장함
-                            PositionItem memberInfo = new PositionItem(members.getJSONObject(i).getString("nickName"), members.getJSONObject(i).getString("roadName"),
-                                    members.getJSONObject(i).getDouble("y"), members.getJSONObject(i).getDouble("x"));
-                            list_g_users.add(memberInfo);       //TODO: null일때는 추가가 안됨(x와 y값이 없을 시)
+                            //x인 경도: -180 ~ 180.    y인 위도: -90 ~ 90 가능(값이 null인 없으면 360으로 각각 저장)
+                            PositionItem memberInfo;
+                            if (members.getJSONObject(i).isNull("roadName")) {      //위치를 지정한 적이 없다면 도로명주소도 없고 위도, 경도도 없음(위도와 경도 모두 360으로 설정함)
+                                memberInfo = new PositionItem(members.getJSONObject(i).getString("nickName"), "",
+                                        360.0, 360.0);
+                            }
+                            else {      //마이페이지에서 위치를 지정한 적이 있다면 도로명주소와 위도, 경도값이 존재함
+                                memberInfo = new PositionItem(members.getJSONObject(i).getString("nickName"), members.getJSONObject(i).getString("roadName"),
+                                        members.getJSONObject(i).getDouble("y"), members.getJSONObject(i).getDouble("x"));
+                            }
+                            list_g_users.add(memberInfo);
                         }
 
                         Intent it_choiceGPSG = new Intent(SelectWhomActivity.this, ChoiceGPSGroupActivity.class);

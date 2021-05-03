@@ -44,7 +44,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent it_mypage = new Intent(HomeActivity.this, MyPageActivity.class);         //마이페이지 창으로 화면이 전환됨
                 startActivity(it_mypage);
-                finish();
             }
         });
         tv_home_goFriend.setOnClickListener(new View.OnClickListener() {       //"친구(추가/삭제)" 버튼을 클릭했을 때

@@ -1,6 +1,7 @@
 package com.example.findspot;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import static com.example.findspot.SelectWhomActivity.selectedGroup;
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder>{
     private ArrayList<GroupInfo> groupList = null;
     private boolean isSelectWhomActivity = true;
+    private int selected_pos = -1;
 
     public GroupRecyclerAdapter(ArrayList<GroupInfo> groupList, boolean isSelectWhomActivity) {
         this.groupList = groupList;
@@ -38,19 +40,24 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     public void onBindViewHolder(GroupRecyclerAdapter.GroupViewHolder holder, int position) {
         holder.grouprow_title.setText(groupList.get(position).getGroupName());       //해당 위치를 인덱스로 한 리스트에 저장된 그룹이름을 텍스트로 설정함
         holder.grouprow_users.setText(String.join(", ", groupList.get(position).getGroupUsers()));      //사용자 이름을 ,을 구분자로 사용하여 출력함(ex. 영은, 소은)
+
+        if (position == selected_pos)   //항목 선택 시 색깔이 보이게 함
+            holder.itemView.setBackgroundColor(Color.parseColor("#D4D4D4"));
+        else
+            holder.itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
     }
 
     @Override
     public int getItemCount() {
         //Adapter가 관리하는 전체 데이터 개수 반환
-        return groupList.size();        //TODO: 문제 발생(NullPointer참조 문제)
+        return groupList.size();
     }
 
     public class GroupViewHolder extends RecyclerView.ViewHolder {
         TextView grouprow_title;
         TextView grouprow_users;
 
-        GroupViewHolder(View itemView) {
+        GroupViewHolder(final View itemView) {
             super(itemView);
             grouprow_title = itemView.findViewById(R.id.grouprow_title);
             grouprow_users = itemView.findViewById(R.id.grouprow_users);
@@ -61,12 +68,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                     if (isSelectWhomActivity) {     //SelectWhomActivity에서 그룹의 항목을 클릭할 시
                         int pos = getAdapterPosition();
                         if (pos != RecyclerView.NO_POSITION) {
+                            selected_pos = pos;
+
                             selectedGroup.setGroupName(groupList.get(pos).getGroupName());      //그룹이름 수정
                             selectedGroup.setGHostName(groupList.get(pos).getGHostName());      //그룹방장이름 수정
                             selectedGroup.setGroupUsers(groupList.get(pos).getGroupUsers());    //그룹에 속한 사용자 목록 수정
 
                             btn_selwhom_next.setEnabled(true);      //그룹 목록에서의 항목을 선택시 활성화되어야 함
-                            //TODO: 항목선택 시 배경색을 바꾸게 해야함
+
+                            notifyDataSetChanged();
                         }
                     }
                 }

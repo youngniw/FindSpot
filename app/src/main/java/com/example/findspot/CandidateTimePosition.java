@@ -41,7 +41,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
     }
 
     @Override
-    public int compareTo(CandidateTimePosition ctp) {   //timeGap값에 대해 오름차순 정렬이 가능하게 함 TODO: 오름차순인지 확인해야 함
+    public int compareTo(CandidateTimePosition ctp) {   //timeGap값에 대해 오름차순 정렬이 가능하게 함
         if (this.timeGap < ctp.getTimeGap()) {
             return -1;
         } else if (this.timeGap > ctp.getTimeGap()) {
@@ -70,7 +70,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 if (timeGap <= 10)      //거리상 중간 지점의 사용자들의 소요 시간 오차가 10보다 작은 경우
                     resultTPositions.add(this);       //결과 후보 중에 하나로 저장함
 
-                activity.searchNext();      //timeGap 값이 10보다 작거나 같은 경우에는 결과 후보로 가능하므로 resultPosition에 추가됨
+                activity.getDMiddleNearTime();
                 break;
             }
             case 1: {   //거리상 중간 지점 근처 역에 해당하는 객체일 때
@@ -88,7 +88,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                     searchTPositions.add(this);   //거리기준 중간지점역보다 소요시간 오차가 더 작으므로 결과 후보는 아니더라도 기준 검색 후보로 추가됨
 
                 if (countFinishLoop == 0)
-                    activity.searchNextNext();
+                    activity.getNearInfoByS();    //서버(DB)로부터 근처 역을 기준으로 한 그 근처의 지하철역들을 받아옴
 
                 Log.i("stationCase1Name", stationName);
                 break;
@@ -106,7 +106,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 Log.i("stationCase2Name", stationName);
 
                 if (countFinishLoop == 0)
-                    activity.searchNextNextNextNext();
+                    activity.resultTMiddle();     //결과 출력
                 break;
             }
         }

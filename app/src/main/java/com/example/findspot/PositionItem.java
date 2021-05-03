@@ -22,18 +22,10 @@ public class PositionItem {
     }
 
     public String getUserName() { return userName; }
-
     public String getRoadName() { return roadName; }
-
     public double getLatitude() { return latitude; }
-
     public double getLongitude() { return longitude; }
 
-    public void setUserName(String userName) { this.userName = userName; }
-
-    public void setRoadName(String roadName) { this.roadName = roadName; }
-
     public void setLatitude(double latitude) { this.latitude = latitude; }
-
     public void setLongitude(double longitude) { this.longitude = longitude; }
 }

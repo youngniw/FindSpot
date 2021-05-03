@@ -49,7 +49,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         String getExtraH = getIntent().getStringExtra("history");
 
         position_tmp = new ArrayList<PositionItem>();
-        list_group = new ArrayList<PositionItem>();
+        list_group = new ArrayList<PositionItem>();         //TODO: ShowMiddleActivity에서 뒤로가기를 할 때 clear해줘야 함
         for (PositionItem pi : list_g_users) {
             list_group.add(new PositionItem(pi.getUserName(), "", 0.0, 0.0));
         }
@@ -75,21 +75,21 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         tv_applyhistory.setOnClickListener(new View.OnClickListener() {     //"최근에 [시간/거리] 찾은 위치 보기" 텍스트 클릭 시
             @Override
             public void onClick(View v) {
-                //TODO: 위치 기록으로 중간지점 찾기가 보이도록 함(만약에 이전에 시간이었다면, 시간(standard)으로 보여주자) -> tag로 기록 보여주는 것을 알려줘야함(Showmiddle에)
-                if (ghistory.get(0).equals("T")) {  //최근에 이 그룹으로 시간 기준 중간지점을 찾은 적이 있음
+                //위치 기록으로 중간지점 찾기가 보이도록 함
+                if (ghistory.getStandard().equals("T")) {  //최근에 이 그룹으로 시간 기준 중간지점을 찾은 적이 있음
                     //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
                     Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                    it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
-                    //TODO: it_showmiddle.putExtra("isHistory", "true");
                     it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                    it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
+                    it_showmiddle.putExtra("isHistory", "true");       //이전 history 결과를 보여줘야 함
                     startActivity(it_showmiddle);
                 }
                 else {  //최근에 이 그룹으로 거리 기준 중간지점을 찾은 적이 있음(D)
                     //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
                     Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                    it_showmiddle.putExtra("standard_tag", "distance");    //거리 기준
-                    //TODO: it_showmiddle.putExtra("isHistory", "true");
-                    it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                    it_showmiddle.putExtra("activity_tag", "group");    //어떤 Activity인지(random / group)
+                    it_showmiddle.putExtra("standard_tag", "distance"); //거리 기준
+                    it_showmiddle.putExtra("isHistory", "true");        //이전 history 결과를 보여줘야 함
                     startActivity(it_showmiddle);
                 }
             }
@@ -115,7 +115,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                     it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
                     it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
                     startActivity(it_showmiddle);
-                    //TODO: DB에 최근으로 중간 지점 위치 전달하기
                 }
             }
         });
@@ -128,7 +127,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 it_showmiddle.putExtra("standard_tag", "distance");     //거리 기준
                 it_showmiddle.putExtra("activity_tag", "group");        //어떤 Activity인지(random / group)
                 startActivity(it_showmiddle);
-                //TODO: DB에 최근으로 중간 지점 위치 전달하기
             }
         });
     }
