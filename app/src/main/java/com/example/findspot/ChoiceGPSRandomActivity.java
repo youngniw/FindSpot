@@ -117,7 +117,8 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
                 //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
                 Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
                 it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
-                it_showmiddle.putExtra("activity_tag", "random");   //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("activity_tag", "random");  //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("isHistory", "false");      //history 결과 보여주는 것이 아님
                 startActivity(it_showmiddle);
             }
         });
@@ -127,8 +128,9 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
                 Intent it_showmiddle = new Intent(ChoiceGPSRandomActivity.this, ShowMiddleActivity.class);
-                it_showmiddle.putExtra("standard_tag", "distance");    //거리 기준
-                it_showmiddle.putExtra("activity_tag", "random");      //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("standard_tag", "distance"); //거리 기준
+                it_showmiddle.putExtra("activity_tag", "random");   //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("isHistory", "false");       //history 결과 보여주는 것이 아님
                 startActivity(it_showmiddle);
             }
         });

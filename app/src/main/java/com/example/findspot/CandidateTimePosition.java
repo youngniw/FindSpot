@@ -62,11 +62,10 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 maxTime = mt.get(i);
         }
         timeGap = maxTime - minTime;
-        Log.i("stationGap+Name", String.valueOf(timeGap)+": "+ stationName);
+        Log.i("CTP_stationGap+Name", String.valueOf(timeGap)+": "+ stationName);
 
         switch (whichStation) {
             case 0: {   //거리상 중간 지점에 해당하는 역이 객체일 때
-                Log.i("stationSwitch", "case0");
                 if (timeGap <= 10)      //거리상 중간 지점의 사용자들의 소요 시간 오차가 10보다 작은 경우
                     resultTPositions.add(this);       //결과 후보 중에 하나로 저장함
 
@@ -74,7 +73,6 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 break;
             }
             case 1: {   //거리상 중간 지점 근처 역에 해당하는 객체일 때
-                Log.i("stationSwitch", "case1");
                 activity.countFinishLoop--;
 
                 if (timeGap < minTimeGapS.getTimeGap())
@@ -90,11 +88,9 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 if (countFinishLoop == 0)
                     activity.getNearInfoByS();    //서버(DB)로부터 근처 역을 기준으로 한 그 근처의 지하철역들을 받아옴
 
-                Log.i("stationCase1Name", stationName);
                 break;
             }
             case 2: {   //거리 상 중간 지점의 근처 역중 가장 소요시간이 작은 역의 근처역 or SearchTPositions의 역을 기준으로 하는 근처 역에 해당하는 객체일 때
-                Log.i("stationSwitch", "case2");
                 activity.countFinishLoop--;
 
                 if (timeGap < minTimeGapS.getTimeGap())
@@ -102,8 +98,6 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
 
                 if (timeGap <= 10)  //해당 역의 시간 소요 오차 시간의 최대와 최소가 10보다 작거나 같을 때
                     resultTPositions.add(this);   //10보다 작거나 같으므로 결과 후보로 추가
-
-                Log.i("stationCase2Name", stationName);
 
                 if (countFinishLoop == 0)
                     activity.resultTMiddle();     //결과 출력

@@ -114,6 +114,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                     Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
                     it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
                     it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                    it_showmiddle.putExtra("isHistory", "false");      //history 결과 보여주는 것이 아님
                     startActivity(it_showmiddle);
                 }
             }
@@ -126,6 +127,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
                 it_showmiddle.putExtra("standard_tag", "distance");     //거리 기준
                 it_showmiddle.putExtra("activity_tag", "group");        //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("isHistory", "false");           //history 결과 보여주는 것이 아님
                 startActivity(it_showmiddle);
             }
         });

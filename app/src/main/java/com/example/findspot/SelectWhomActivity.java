@@ -113,25 +113,26 @@ public class SelectWhomActivity extends AppCompatActivity {
                 public void onResponse(String response) {
                     try {
                         list_g_users.clear();
+                        ghistory.historyClear();
                         JSONObject jsonObject = new JSONObject(response);
 
                         //이전에 이 그룹에서 중간 지점 찾기를 한 기록이 있는 지 여부에 따른 수행(기록이 있음-> TRUE)
                         JSONObject groupObject = jsonObject.getJSONObject("group");
                         if (groupObject.getBoolean("historyTF")) {
-                            ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
-                            if (groupObject.getString("standard").equals("T")) {    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때(T)
+                            if (groupObject.getString("standard").equals("T"))    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때(T)
                                 extras.putString("history", "최근 기록 확인 [시간 기준]  >>");      //기록 전달
-                                //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
-                                JSONArray hisStations = groupObject.getJSONArray("hisStations");        //TODO: 확인바람!!!!!!!!!!!!!!
-                                for (int i=0; i<hisStations.length(); i++) {
-                                    ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"),
-                                            hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
-                                }
-                            }
                             else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때(D)
                                 extras.putString("history", "최근 기록 확인 [거리 기준]  >>");      //기록 전달
-                            ghistory.setWhereX(groupObject.getDouble("x"));     //최근 중간지점의 경도
+                            ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
+
+                            //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
+                            JSONArray hisStations = groupObject.getJSONArray("hisStations");
+                            for (int i=0; i<hisStations.length(); i++) {
+                                ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"),
+                                        hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
+                            }
                             ghistory.setWhereY(groupObject.getDouble("y"));     //최근 중간지점의 위도
+                            ghistory.setWhereX(groupObject.getDouble("x"));     //최근 중간지점의 경도
                             JSONArray usersPick = groupObject.getJSONArray("usersPick");
                             for (int i=0; i<usersPick.length(); i++) {      //history의 중간지점에 대한 사용자들의 위치 선택 정보
                                 ghistory.getUsersPick().add(new PositionItem(usersPick.getJSONObject(i).getString("nickName"), "",
