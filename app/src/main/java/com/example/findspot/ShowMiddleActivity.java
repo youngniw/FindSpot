@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -29,6 +30,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import me.relex.circleindicator.CircleIndicator;
+
 import static com.example.findspot.ChoiceGPSRandomActivity.list_random;
 import static com.example.findspot.ChoiceGPSGroupActivity.list_group;
 import static com.example.findspot.SelectWhomActivity.ghistory;
@@ -46,6 +49,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     static CandidateTimePosition minTimeGapS;
     static ArrayList<CandidateTimePosition> resultTPositions;  //소요시간 최대 및 최소 오차가 10 이하인 역들
     static ArrayList<CandidateTimePosition> searchTPositions;  //(더 조사해야하는 역들)
+
+    ViewPager pager;
+    PositionPagerAdapter adapter;
+    CircleIndicator indicator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +82,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
             if (getExtra_activity.equals("random")) list = list_random;
             else if (getExtra_activity.equals("group")) list = list_group;
         }
+
+        searchTPositions = new ArrayList<>();    //현재 기준이 되는 지하철역보다 시간 오차가 작은 지하철역들을 저장(더 조사해야하는 역들)
+        resultTPositions = new ArrayList<>();    //찾아본 지하철역 중 시간 오차가 10보다 작거나 같은 지하철역들이 저장됨
+
+        //TODO:수정시작
+        pager = (ViewPager)findViewById(R.id.showmiddle_viewPager);
+        indicator = (CircleIndicator) findViewById(R.id.indicator);
+        adapter = new PositionPagerAdapter(this, list , resultTPositions);
 
         //전체 사용자 ping으로 나타내기
         for (int i = 0; i < list.size(); i++) {
@@ -157,8 +172,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 }
             }
             else {  //기록을 보여주는 것이 아닌 실제로 알고리즘 수행해야함
-                searchTPositions = new ArrayList<>();    //현재 기준이 되는 지하철역보다 시간 오차가 작은 지하철역들을 저장(더 조사해야하는 역들)
-                resultTPositions = new ArrayList<>();    //찾아본 지하철역 중 시간 오차가 10보다 작거나 같은 지하철역들이 저장됨
                 visitedStations = new HashMap<String, Boolean>();   //지하철역에 대해 timeGap계산을 했는 지를 저장함
                 minTimeGapS = new CandidateTimePosition();   //이후에 주변역들 중 소요시간 최소인 곳을 저장함
 
@@ -442,7 +455,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         //가장 소요시간 차가 작은 위치를 기준으로 화면의 중심점 및 줌레벨 설정
         mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultTPositions.get(0).getResultPositionY(), resultTPositions.get(0).getResultPositionX()), 4, false);
 
-        //결과로 보일 역의 개수가 5보다 작을 때
+        //결과 핑 출력
         int size = resultTPositions.size() < 5 ? resultTPositions.size() : 5;
         for (int i=1; i<size; i++) {
             //거리 기준 중간 지점 역 출력
@@ -455,8 +468,12 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
             mapView.addPOIItem(station);   //지도에 ping 추가
         }
 
-        //TODO: 결과 출력 방법 설정 & 출력
+        //TODO: 위치 설정 어디로?
+        pager.setAdapter(adapter);
+        indicator.setViewPager(pager);
+        adapter.registerDataSetObserver(indicator.getDataSetObserver());
 
+        adapter.notifyDataSetChanged();
 
         //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
         if (getIntent().getStringExtra("activity_tag").equals("group"))

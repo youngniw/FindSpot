@@ -14,18 +14,19 @@ import static com.example.findspot.ShowMiddleActivity.searchTPositions;
 public class CandidateTimePosition implements Comparable<CandidateTimePosition> {
     private ShowMiddleActivity activity;
     private int whichStation = 0;
-    private int timeGap = 0;    //소요시간이 제일 큰 위치와 작은 위치의 소요시간 차
     private int size = 0;       //사용자 수
+    private int saveCompleteN = 0;  //사용자의 결과가 도출된 개수
+    private int timeGap = 0;    //소요시간이 제일 큰 위치와 작은 위치의 소요시간 차
     private String stationName = "";
     private double resultPositionX = 0.0;       //endX값
     private double resultPositionY = 0.0;       //endY값
-    private ArrayList<Integer> mt = null;       //사용자별 소요시간
+    private ArrayList<RouteInfo> routes = null;    //사용자별 경로 정보
 
-    CandidateTimePosition (ShowMiddleActivity activity, Context context, int whichStation, ArrayList<PositionItem> list, String stationName, double resultPositionX, double resultPositionY) {
+    CandidateTimePosition(ShowMiddleActivity activity, Context context, int whichStation, ArrayList<PositionItem> list, String stationName, double resultPositionX, double resultPositionY) {
         this.activity = activity;
         this.whichStation = whichStation;
 
-        mt = new ArrayList<>();
+        routes = new ArrayList<RouteInfo>();
 
         this.stationName = stationName;
         this.resultPositionX = resultPositionX;        //임시로 계산할 중간지점 x값(경도)
@@ -36,7 +37,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
             new MiddleTime(context, this, list.get(i).getLongitude(), list.get(i).getLatitude(), resultPositionX, resultPositionY);
         }
     }
-    CandidateTimePosition () {  //거리상 중간지점을 제외한 소요시간 차가 가장 작은 지하철역을 저장하기 위해 초기 값을 가장 큰 숫자로 해서 추후에 주변 리스트의 값 중 하나가 저장되게 함
+    CandidateTimePosition() {  //거리상 중간지점을 제외한 소요시간 차가 가장 작은 지하철역을 저장하기 위해 초기 값을 가장 큰 숫자로 해서 추후에 주변 리스트의 값 중 하나가 저장되게 함
         this.timeGap = Integer.MAX_VALUE;
     }
 
@@ -54,12 +55,12 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
         //리스트의 순서대로 실행되게 함
         int maxTime = 0;
         int minTime = Integer.MAX_VALUE;
-        for (int i=0; i<mt.size(); i++) {     //중간지점을 찾는 사람들의 거리상의 중간지점과의 시간 오차를 얻어냄
-            if (minTime > mt.get(i))      //얻어낸 소요시간이 이전까지 구한 소요시간 중 최소값보다 작은 경우
-                minTime = mt.get(i);
+        for (int i=0; i<routes.size(); i++) {     //중간지점을 찾는 사람들의 거리상의 중간지점과의 시간 오차를 얻어냄
+            if (minTime > routes.get(i).getTotalTime())      //얻어낸 소요시간이 이전까지 구한 소요시간 중 최소값보다 작은 경우
+                minTime = routes.get(i).getTotalTime();
 
-            if (maxTime < mt.get(i))      //얻어낸 소요시간이 이전까지 구한 소요시간 중 최대값보다 작은 경우
-                maxTime = mt.get(i);
+            if (maxTime < routes.get(i).getTotalTime())      //얻어낸 소요시간이 이전까지 구한 소요시간 중 최대값보다 작은 경우
+                maxTime = routes.get(i).getTotalTime();
         }
         timeGap = maxTime - minTime;
         Log.i("CTP_stationGap+Name", String.valueOf(timeGap)+": "+ stationName);
@@ -108,9 +109,10 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
 
     public int getTimeGap() { return timeGap; }
     public int getSize() { return size; }
-
+    public int getSaveCompleteN() { return saveCompleteN; }
+    public void addSaveN() { saveCompleteN++; }
     public String getStationName() { return stationName; }
     public double getResultPositionX() { return resultPositionX; }
     public double getResultPositionY() { return resultPositionY; }
-    public ArrayList<Integer> getMt() { return mt; }
+    public ArrayList<RouteInfo> getRouteInfo() { return routes; }
 }
