@@ -77,7 +77,9 @@
             android:layout_height="0dp"
             android:layout_weight="2"
             android:orientation="vertical"
-            android:layout_margin="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:background="@drawable/bg_round">
 
             <me.relex.circleindicator.CircleIndicator

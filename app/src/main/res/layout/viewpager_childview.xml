@@ -27,7 +27,8 @@
                 android:id="@+id/tv_timeGap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="오차시간: 1분"/>
+                android:text="오차시간: 1분"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout

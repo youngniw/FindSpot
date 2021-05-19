@@ -5,10 +5,10 @@ import android.util.Log;
 import java.util.ArrayList;
 
 public class RouteInfo {
-    private int pathType = 0;     //결과 종류(1: 지하철, 2: 버스, 3: 지하철+버스)
+    private int pathType = 0;     //결과 종류(1: 지하철, 2: 버스, 3: 지하철+버스, 4: history임)
     private int totalTime = 0;
-    private int transitNum = 0;     //총 환승횟수
-    private ArrayList<SubPath> paths;
+    private int transitNum = 0;     //총 환승횟수(pathType가 4일 때는 사용되지 않음)
+    private ArrayList<SubPath> paths;       //(pathType가 4일 때는 사용되지 않음)
 
     RouteInfo(int pathType, int totalTime, int transitNum) {
         this.pathType = pathType;

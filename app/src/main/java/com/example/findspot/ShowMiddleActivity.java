@@ -89,7 +89,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         //TODO:수정시작
         pager = (ViewPager)findViewById(R.id.showmiddle_viewPager);
         indicator = (CircleIndicator) findViewById(R.id.indicator);
-        adapter = new PositionPagerAdapter(this, list , resultTPositions);
+        adapter = new PositionPagerAdapter(this, list, resultTPositions);
 
         //전체 사용자 ping으로 나타내기
         for (int i = 0; i < list.size(); i++) {
@@ -122,8 +122,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
             MapPOIItem middle_d = new MapPOIItem();
 
             if (getIntent().getStringExtra("isHistory").equals("true")) {     //history로 저장된 x와 y의 값을 중간지점으로 보여줘야 함
-                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getWhereY()), Double.valueOf(ghistory.getWhereX())));     //ping 위치 지정
-                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getWhereY()), Double.valueOf(ghistory.getWhereX())), 4, false);   //history의 위치 기준으로 화면의 중심점 및 줌레벨 설정
+                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())));     //ping 위치 지정
+                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())), 4, false);   //history의 위치 기준으로 화면의 중심점 및 줌레벨 설정
 
                 //중간지점의 근처 지하철 역 출력
                 for (int i = 0; i < ghistory.getHisStations().size(); i++) {
@@ -151,15 +151,33 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
         else if (getExtra_standard.equals("time")) {       //시간기준일 경우
             if (getIntent().getStringExtra("isHistory").equals("true")){    //이전에 사용한 기록을 화면으로 보여줘야 함
+                //TODO: ViewPager가 나오게 해야함(resultTPositions가 있어야 함) -> 확인!!!!!!!!!!!!!!!!!
+                //중간지점역 수동 저장
+                CandidateTimePosition tmpMiddleTimePosition = new CandidateTimePosition(ghistory.getUsersPick().size(), ghistory.getMiddleTakeTOrD(), ghistory.getMiddleSName());
+                for (Double middleTOrD : ghistory.getMiddleTakeTOrD()) {
+                    tmpMiddleTimePosition.getRouteInfo().add(new RouteInfo(4, middleTOrD.intValue(), 0));
+                }
+                for (int i=0; i<ghistory.getHisStations().size(); i++) {      //근처 역 정보 저장
+                    CandidateTimePosition tmpNearTimePosition = new CandidateTimePosition(ghistory.getUsersPick().size(), ghistory.getNearTakeTOrD().get(i).getUsersTakeTOrD(), ghistory.getHisStations().get(i).getStation());
+                    for (Double nearTOrD : ghistory.getNearTakeTOrD().get(i).getUsersTakeTOrD()){
+                        tmpNearTimePosition.getRouteInfo().add(new RouteInfo(4, nearTOrD.intValue(), 0));
+                    }
+                }
+
+                pager.setAdapter(adapter);
+                indicator.setViewPager(pager);
+                adapter.registerDataSetObserver(indicator.getDataSetObserver());
+                adapter.notifyDataSetChanged();
+
                 //가장 추천하는 시간 중점 위치 핑으로 보여줌
                 MapPOIItem middle_d = new MapPOIItem();
                 middle_d.setItemName("시간상 중간지점");   //ping 선택 후 말풍선에 보여질 내용
-                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getWhereY()), Double.valueOf(ghistory.getWhereX())));     //ping 위치 지정
+                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())));     //ping 위치 지정
                 middle_d.setMarkerType(MapPOIItem.MarkerType.CustomImage);
                 middle_d.setCustomImageResourceId(R.drawable.middlepin_75);
                 middle_d.setSelectedMarkerType(null);                       //선택 효과 마커 타입
                 mapView.addPOIItem(middle_d);   //지도에 ping 추가
-                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getWhereY()), Double.valueOf(ghistory.getWhereX())), 4, false);   //history의 위치 기준으로 화면의 중심점 및 줌레벨 설정
+                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())), 4, false);   //history의 위치 기준으로 화면의 중심점 및 줌레벨 설정
 
                 //그 외의 나머지 지하철 역 출력
                 for (int i=0; i < ghistory.getHisStations().size(); i++) {
@@ -490,10 +508,12 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     //입력한 값들에 대한 거리 기준 중간지점을 위한 작업 수행함
     public class saveHistoryTask extends AsyncTask<String, Void, String> {
         String standard = "";
+        String resultSName = "";
         double resultLat = 0.0;
         double resultLong = 0.0;
         String usersPick = "";
         String resultStations = "";
+        String takeTOrD = "";
 
         saveHistoryTask(String standard, double resultLat, double resultLong) {
             this.standard = standard;
@@ -515,12 +535,25 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
             }
             else {      //시간 기준으로 중간지점 결과를 찾은 경우
                 int size = resultTPositions.size() < 5 ? resultTPositions.size() : 5;
-                for (int i=1; i<size; i++) {    //이외의 역들
-                    resultStations = resultStations.concat(resultTPositions.get(i).getStationName()+",");
+                if (size > 0) {
+                    resultSName = resultTPositions.get(0).getStationName();
+
+                    for (int i=0; i<size; i++) {    //이외의 역들
+                        if (i!=0) {
+                            resultStations = resultStations.concat(resultTPositions.get(i).getStationName()+",");
+                        }
+
+                        for (RouteInfo personRoute : resultTPositions.get(i).getRouteInfo()) {
+                            takeTOrD += personRoute.getTotalTime()+",";
+                        }
+                        takeTOrD = takeTOrD.substring(0, takeTOrD.length()-1);   //마지막 문자 , 삭제하기
+                        takeTOrD += ";";
+                    }
+                    resultStations = resultStations.substring(0, resultStations.length()-1);   //마지막 문자 , 삭제하기
                 }
-                resultStations = resultStations.substring(0, resultStations.length()-1);   //마지막 문자 , 삭제하기
             }
-            Log.i("result", resultStations);
+            Log.i("resultStations", resultStations);
+            Log.i("resultTakeTOrD", takeTOrD);
         }
 
         @Override
@@ -534,9 +567,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
             };
+
             // 서버로 Volley를 이용해서 요청을 함
             SaveHistoryRequest sHistoryRequest = new SaveHistoryRequest(selectedGroup.getGroupName(), selectedGroup.getGHostName(),
-                    standard, resultLat, resultLong, usersPick, resultStations, responseListener);    //반경을 radius로(km) 하며 위치를 줌
+                    standard, resultSName, resultLat, resultLong, usersPick, resultStations, takeTOrD, responseListener);    //반경을 radius로(km) 하며 위치를 줌
             RequestQueue queueSave = Volley.newRequestQueue(ShowMiddleActivity.this);
             queueSave.add(sHistoryRequest);
 

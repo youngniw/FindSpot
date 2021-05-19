@@ -3,6 +3,7 @@ package com.example.findspot;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
@@ -119,28 +120,55 @@ public class SelectWhomActivity extends AppCompatActivity {
                         //이전에 이 그룹에서 중간 지점 찾기를 한 기록이 있는 지 여부에 따른 수행(기록이 있음-> TRUE)
                         JSONObject groupObject = jsonObject.getJSONObject("group");
                         if (groupObject.getBoolean("historyTF")) {
-                            if (groupObject.getString("standard").equals("T"))    //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때(T)
-                                extras.putString("history", "최근 기록 확인 [시간 기준]  >>");      //기록 전달
-                            else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때(D)
-                                extras.putString("history", "최근 기록 확인 [거리 기준]  >>");      //기록 전달
-                            ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
+                            if (groupObject.getJSONArray("usersPick").length() == groupObject.getJSONArray("middleTakeTOrD").length()) {
+                                ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
+                                if (groupObject.getString("standard").equals("T")) {   //최근 기록이 시간기준으로 중간지점을 찾은 기록일 때(T)
+                                    extras.putString("history", "최근 기록 확인 [시간 기준]  >>");      //기록 전달
+                                    ghistory.setMiddleSName(groupObject.getString("middleSName")); //최근 중간지점의 지하철역이름
+                                }
+                                else        //최근 기록이 거리기준으로 중간지점을 찾은 기록일 때(D)
+                                    extras.putString("history", "최근 기록 확인 [거리 기준]  >>");      //기록 전달
+                                ghistory.setMiddleY(groupObject.getDouble("y"));     //최근 중간지점의 위도
+                                ghistory.setMiddleX(groupObject.getDouble("x"));     //최근 중간지점의 경도
+                                JSONArray middleTakeTOrD = groupObject.getJSONArray("middleTakeTOrD");      //중간지점에 대한 사용자들의 소요시간/거리
+                                for (int i=0; i<middleTakeTOrD.length(); i++) {
+                                    ghistory.getMiddleTakeTOrD().add(middleTakeTOrD.getJSONObject(i).getDouble("take"));
+                                }
+                                JSONArray usersPick = groupObject.getJSONArray("usersPick");
+                                for (int i=0; i<usersPick.length(); i++) {      //history의 중간지점에 대한 사용자들의 위치 선택 정보
+                                    ghistory.getUsersPick().add(new PositionItem(usersPick.getJSONObject(i).getString("nickName"), "",
+                                            usersPick.getJSONObject(i).getDouble("y"), usersPick.getJSONObject(i).getDouble("x")));
+                                }
+                                JSONArray hisStations = groupObject.getJSONArray("hisStations");    //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
+                                Log.i("resultGHis", String.valueOf(hisStations.length()));
+                                for (int i=0; i<hisStations.length(); i++) {
+                                    //TODO: 첫번째 로그 없으면 hisStations가 2개밖에 안나옴
+                                    Log.i("resultG", "1");
+                                    ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"), hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
 
-                            //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
-                            JSONArray hisStations = groupObject.getJSONArray("hisStations");
-                            for (int i=0; i<hisStations.length(); i++) {
-                                ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"),
-                                        hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
+                                    Log.i("resultG", "2");
+                                    JSONArray nearTakeTOrD = hisStations.getJSONObject(i).getJSONArray("nearTakeTOrD");      //중간 이외 결과 위치에 대한 사용자들의 소요시간/거리
+                                    if (groupObject.getJSONArray("usersPick").length() != nearTakeTOrD.length()) {
+                                        extras.putString("history", "noHistory");      //기록 전달(history에 문제가 있으니 보여주지 마라!)
+                                        break;
+                                    }
+                                    Log.i("resultGNearTake", String.valueOf(nearTakeTOrD.length()));
+                                    Log.i("resultGNearTakeD", hisStations.getJSONObject(i).getString("nearTakeTOrD"));
+                                    ArrayList<Double> nearTakeTOrDList = new ArrayList<>();
+                                    //TODO: nearTakeTOrD의 길이가 3인데 resultG의 4는 2개밖에 안나옴
+                                    for (int j=0; j<nearTakeTOrD.length(); j++) {
+                                        Log.i("resultG", "4");
+                                        nearTakeTOrDList.add(nearTakeTOrD.getJSONObject(j).getDouble("take"));
+                                    }
+                                    ghistory.getNearTakeTOrD().add(new GHistoryInfo.NearStationTakeTOrD(nearTakeTOrDList));
+                                    Log.i("resultG", "5");
+                                }
                             }
-                            ghistory.setWhereY(groupObject.getDouble("y"));     //최근 중간지점의 위도
-                            ghistory.setWhereX(groupObject.getDouble("x"));     //최근 중간지점의 경도
-                            JSONArray usersPick = groupObject.getJSONArray("usersPick");
-                            for (int i=0; i<usersPick.length(); i++) {      //history의 중간지점에 대한 사용자들의 위치 선택 정보
-                                ghistory.getUsersPick().add(new PositionItem(usersPick.getJSONObject(i).getString("nickName"), "",
-                                        usersPick.getJSONObject(i).getDouble("y"), usersPick.getJSONObject(i).getDouble("x")));
-                            }
+                            else
+                                extras.putString("history", "noHistory");      //기록 전달(history에 문제가 있으니 보여주지 마라!)
                         }
                         else
-                            extras.putString("history", "noHistory");      //기록 전달(보여주지 마라!)
+                            extras.putString("history", "noHistory");      //기록 전달(history가 없으니 보여주지 마라!)
 
                         JSONArray members = jsonObject.getJSONArray("members");
                         for (int i=0; i<members.length(); i++) {    //사용자 정보를 list_g_users에 저장함
