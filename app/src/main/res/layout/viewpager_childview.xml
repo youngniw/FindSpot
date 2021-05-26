@@ -24,7 +24,7 @@
                 android:text="📍잠실역"/>
 
             <TextView
-                android:id="@+id/tv_timeGap"
+                android:id="@+id/tv_Gap"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="오차시간: 1분"

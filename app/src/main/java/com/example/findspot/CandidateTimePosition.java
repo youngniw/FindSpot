@@ -44,8 +44,9 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
     //시간 기준 history를 위해 사용됨
     CandidateTimePosition(int size, ArrayList<Double> takeTimeList, String stationName) {
         this.size = size;
+        this.stationName = stationName;
 
-        //TODO: takeTimeList를 통해 timeGap 구함
+        //takeTimeList를 통해 timeGap 구함
         Double min = takeTimeList.get(0);
         Double max = takeTimeList.get(0);
         for (int i=1; i<takeTimeList.size(); i++){
@@ -56,9 +57,11 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 min = takeTimeList.get(i);
         }
         timeGap = max.intValue()-min.intValue();
-        this.stationName = stationName;
 
         routes = new ArrayList<RouteInfo>();
+        for (Double take : takeTimeList) {
+            routes.add(new RouteInfo(4, take.intValue(), 0));
+        }
     }
 
 

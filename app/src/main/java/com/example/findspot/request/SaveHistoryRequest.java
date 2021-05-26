@@ -18,7 +18,7 @@ public class SaveHistoryRequest extends StringRequest {
         historyInfo.put("groupName", gName);
         historyInfo.put("groupHostName", gHostName);
         historyInfo.put("standard", standard);  //무슨 기준인지(T / D)
-        historyInfo.put("resultSName", resultSName);    //거리상 중간 지점 지하철역
+        historyInfo.put("resultSName", resultSName);    //시간상 중간 지점 지하철역
         historyInfo.put("resultLat", String.valueOf(resultLat));    //시간 기준이라면 가장 소요시간 간격이 짧은 위치의 위도, 거리 기준이면 중간 지점의 위도
         historyInfo.put("resultLong", String.valueOf(resultLong));
         historyInfo.put("usersPick", usersPick);                //사용자 설정 위치 정보(이름1: 위치, 이름2: 위치, ...)

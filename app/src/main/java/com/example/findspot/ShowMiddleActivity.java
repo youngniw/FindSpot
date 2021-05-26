@@ -42,8 +42,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     ArrayList<PositionItem> list;   //실제 중간지점을 찾을 사람들의 설정 위치 등의 정보
     StationInfo currentStation;     //거리상 중간지점과 가장 가까운 지하철역 정보(고정됨)
     ArrayList<StationInfo> nearStationList;     //현재 기준이 되는 지하철역의 반경 _km 내에 있는 지하철역 리스트(가변적) cf. 거리기준일 때는 결과 주변 지하철 역 리스트들
+    ArrayList <ResultDistancePosition> resultDPositions;
     ArrayList<ArrayList<StationInfo>> nextSearchList;     //거리상 중간 지점 이후 그 근처의 지하철 역을 기준으로 하는 그 근처의 리스트들 목록
     HashMap<String, Boolean> visitedStations;   //지하철 역 중복 계산 방지
+    HashMap<String, Boolean> distinctUserGeo; //사용자 위치중 중복값 제거 (lat, long)
     static int countFinishLoop = 0;
     static CandidateTimePosition current;
     static CandidateTimePosition minTimeGapS;
@@ -89,13 +91,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         //TODO:수정시작
         pager = (ViewPager)findViewById(R.id.showmiddle_viewPager);
         indicator = (CircleIndicator) findViewById(R.id.indicator);
-        adapter = new PositionPagerAdapter(this, list, resultTPositions);
 
         //전체 사용자 ping으로 나타내기
         for (int i = 0; i < list.size(); i++) {
-            MapPOIItem user_ping = new MapPOIItem();     //핑에 대한 객체(속성인 itemname은 핑 이름)
-            if (getExtra_activity.equals("random")) user_ping.setItemName(String.valueOf(i+1));   //ping 선택 후 말풍선에 보여질 내용(random: 순번) ex. 1, 2,...
-            else if (getExtra_activity.equals("group")) user_ping.setItemName(list.get(i).getUserName());    //ping 선택 후 말풍선에 보여질 내용(group: 닉네임)
+            MapPOIItem user_ping = new MapPOIItem();    //핑에 대한 객체(속성인 itemname은 핑 이름)
+            if (getExtra_activity.equals("random"))     //ping 선택 후 말풍선에 보여질 내용(random: 순번) ex. 사람1, 사람2,...
+                user_ping.setItemName("사람"+String.valueOf(i+1));
+            else if (getExtra_activity.equals("group")) //ping 선택 후 말풍선에 보여질 내용(group: 닉네임)
+                user_ping.setItemName(list.get(i).getUserName());
             user_ping.setMapPoint(MapPoint.mapPointWithGeoCoord(list.get(i).getLatitude(), list.get(i).getLongitude()));     //ping 위치 지정(위도 y, 경도 x)
             user_ping.setMarkerType(MapPOIItem.MarkerType.CustomImage);
             user_ping.setCustomImageResourceId(R.drawable.peoplepin_50);
@@ -103,15 +106,22 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
         mapView.setPOIItemEventListener(this);
 
-        //거리 기준 중간지점 계산히기
-        double avgX = 0.0, avgY = 0.0;
+        //TODO: 거리 기준 중간지점 계산하기(먼저 같은 위치가 있다면 제외함 -> 외접원의 중심 구함 -> 안나오면 평균으로 함)
+        double middleDLat = 0.0, middleDLong = 0.0;
+        distinctUserGeo = new HashMap<String, Boolean>();   //선택한 위치 중 중복을 제거해 계산하기 위함
 
         for (PositionItem pi : list) {
-            avgX += pi.getLongitude();
-            avgY += pi.getLatitude();
+            String geo = pi.getLatitude() + "," + pi.getLongitude();
+
+            if (!distinctUserGeo.containsKey(geo)) {
+                distinctUserGeo.put(geo, true);
+
+                middleDLat += pi.getLatitude();       //외접원 중심이 없을 때 사용
+                middleDLong += pi.getLongitude();      //외접원 중심이 없을 때 사용
+            }
         }
-        avgX /= list.size();
-        avgY /= list.size();
+        middleDLat /= distinctUserGeo.size();
+        middleDLong /= distinctUserGeo.size();
 
         //거리 기준에 따른 중간 지점의 가장 근접한 지하철역과 그 역의 주변 지하철역 서버로부터 받기
         nearStationList = new ArrayList<StationInfo>();     //기준이 되는 지하철역의 반경 내의 지하철 역 리스트
@@ -120,8 +130,26 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         String getExtra_standard = getIntent().getStringExtra("standard_tag");
         if (getExtra_standard.equals("distance")) {     //거리기준일 경우(거리상 중간지점)
             MapPOIItem middle_d = new MapPOIItem();
+            resultDPositions = new ArrayList<>();
 
-            if (getIntent().getStringExtra("isHistory").equals("true")) {     //history로 저장된 x와 y의 값을 중간지점으로 보여줘야 함
+            if (getIntent().getStringExtra("isHistory").equals("true")) {
+                //결과를 출력하기 위해 resultDistancePositions 수동 생성
+                ResultDistancePosition middleDistancePosition = new ResultDistancePosition(ghistory.getUsersPick().size(), "거리상 중간지점",
+                        ghistory.getMiddleX(), ghistory.getMiddleY(), ghistory.getMiddleTakeTOrD());
+                resultDPositions.add(middleDistancePosition);    //중간지점역 수동 저장
+
+                for (int i=0; i<ghistory.getHisStations().size(); i++) {      //근처 역 정보 저장(5개) -> 중간지점에 해당하는 역이 없고 근처 5개의 역만 있음
+                    ResultDistancePosition nearDistancePosition = new ResultDistancePosition(ghistory.getUsersPick().size(), ghistory.getHisStations().get(i).getStation(),
+                            ghistory.getHisStations().get(i).getStationX(), ghistory.getHisStations().get(i).getStationY(), ghistory.getNearTakeTOrD().get(i).getUsersTakeTOrD());
+                    resultDPositions.add(nearDistancePosition);
+                }
+                Collections.sort(resultDPositions);     //오차거리에 따른 오름차순으로 정렬
+                adapter = new PositionPagerAdapter(this, list, resultDPositions);
+                pager.setAdapter(adapter);
+                indicator.setViewPager(pager);
+                adapter.registerDataSetObserver(indicator.getDataSetObserver());
+                adapter.notifyDataSetChanged();
+
                 middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())));     //ping 위치 지정
                 mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(Double.valueOf(ghistory.getMiddleY()), Double.valueOf(ghistory.getMiddleX())), 4, false);   //history의 위치 기준으로 화면의 중심점 및 줌레벨 설정
 
@@ -136,12 +164,15 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 }
             }
             else {   //실제로 계산(평균)을 통해 구한 거리상 중간지점으로 출력되게 함
-                try {   //(avgX와 avgY)의 근처 5개 지하철 역 리스트를 요청 및 전달받음(서버에서 5개를 전달함) -> 핑으로 주변 5개의 역을 보여줌
-                    new GetDStationTask(avgX, avgY).execute().get();
+                try {   //(middleDLong와 middleDLat)의 근처 5개 지하철 역 리스트를 요청 및 전달받음(서버에서 5개를 전달함) -> 핑으로 주변 5개의 역을 보여줌
+                    new GetDStationTask(middleDLong, middleDLat).execute().get();
                 } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
-                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(avgY, avgX));     //ping 위치 지정
-                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(avgY, avgX), 4, false); //중간지점을 기준으로 화면의 중심점 및 줌레벨 설정
+                middle_d.setMapPoint(MapPoint.mapPointWithGeoCoord(middleDLat, middleDLong));     //ping 위치 지정
+                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(middleDLat, middleDLong), 4, false); //중간지점을 기준으로 화면의 중심점 및 줌레벨 설정
+
+                ResultDistancePosition middleDistancePosition = new ResultDistancePosition(list.size(), "거리상 중간지점", middleDLong, middleDLat, calTakeDistance(new StationInfo("", middleDLong, middleDLat)));
+                resultDPositions.add(middleDistancePosition);    //중간지점역 수동 저장
             }
             middle_d.setItemName("거리상 중간지점");   //ping 선택 후 말풍선에 보여질 내용
             middle_d.setMarkerType(MapPOIItem.MarkerType.CustomImage);
@@ -151,19 +182,15 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
         else if (getExtra_standard.equals("time")) {       //시간기준일 경우
             if (getIntent().getStringExtra("isHistory").equals("true")){    //이전에 사용한 기록을 화면으로 보여줘야 함
-                //TODO: ViewPager가 나오게 해야함(resultTPositions가 있어야 함) -> 확인!!!!!!!!!!!!!!!!!
-                //중간지점역 수동 저장
-                CandidateTimePosition tmpMiddleTimePosition = new CandidateTimePosition(ghistory.getUsersPick().size(), ghistory.getMiddleTakeTOrD(), ghistory.getMiddleSName());
-                for (Double middleTOrD : ghistory.getMiddleTakeTOrD()) {
-                    tmpMiddleTimePosition.getRouteInfo().add(new RouteInfo(4, middleTOrD.intValue(), 0));
-                }
+                CandidateTimePosition middleTimePosition = new CandidateTimePosition(ghistory.getUsersPick().size(), ghistory.getMiddleTakeTOrD(), ghistory.getMiddleSName());
+                resultTPositions.add(middleTimePosition);    //중간지점역 수동 저장
+
                 for (int i=0; i<ghistory.getHisStations().size(); i++) {      //근처 역 정보 저장
                     CandidateTimePosition tmpNearTimePosition = new CandidateTimePosition(ghistory.getUsersPick().size(), ghistory.getNearTakeTOrD().get(i).getUsersTakeTOrD(), ghistory.getHisStations().get(i).getStation());
-                    for (Double nearTOrD : ghistory.getNearTakeTOrD().get(i).getUsersTakeTOrD()){
-                        tmpNearTimePosition.getRouteInfo().add(new RouteInfo(4, nearTOrD.intValue(), 0));
-                    }
+                    resultTPositions.add(tmpNearTimePosition);
                 }
 
+                adapter = new PositionPagerAdapter(this, true, list, resultTPositions);
                 pager.setAdapter(adapter);
                 indicator.setViewPager(pager);
                 adapter.registerDataSetObserver(indicator.getDataSetObserver());
@@ -193,9 +220,11 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 visitedStations = new HashMap<String, Boolean>();   //지하철역에 대해 timeGap계산을 했는 지를 저장함
                 minTimeGapS = new CandidateTimePosition();   //이후에 주변역들 중 소요시간 최소인 곳을 저장함
 
+                adapter = new PositionPagerAdapter(this, false, list, resultTPositions);
+
                 //위의 try문을 통해 거리상 중간 지점 바로 근처의 지하철역과 그 지하철 역의 반경 2km 내의 지하철역 리스트를 서버로부터 받음
-                try {   //(avgX와 avgY)와 가까운 지하철 역과 그 역의 반경 2km내의 지하철 역 리스트를 요청 및 전달받음
-                    new ShowMiddleActivity.GetTStationTask(true, avgX, avgY, 2).execute().get();
+                try {   //(middleDLong와 middleDLat)와 가까운 지하철 역과 그 역의 반경 2km내의 지하철 역 리스트를 요청 및 전달받음
+                    new ShowMiddleActivity.GetTStationTask(true, middleDLong, middleDLat, 2).execute().get();
                 } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
                 //response에서 조사를 하는 함수를 호출함
@@ -249,7 +278,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                             double nearY = nearStationArray.getJSONObject(i).getDouble("y");
                             StationInfo nearStation = new StationInfo(nearStationName, nearX, nearY);
                             nearStationList.add(nearStation);
-                            Log.i("nearStation", nearStationName);
+                            Log.d("nearStation", nearStationName);
 
                             //5개의 지하철역의 핑 설정
                             MapPOIItem station = new MapPOIItem();
@@ -259,11 +288,23 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                             station.setItemName(nearStationName+"역");   //ping 선택 후 말풍선에 보여질 내용
                             station.setMapPoint(MapPoint.mapPointWithGeoCoord(nearY, nearX));     //ping 위치 지정
                             mapView.addPOIItem(station);   //지도에 ping 추가
+
+                            //근처 역에 대한 middleTakeD 저장
+                            ResultDistancePosition nearDistancePosition = new ResultDistancePosition(list.size(), nearStationName, nearX, nearY, calTakeDistance(new StationInfo(nearStationName, nearX, nearY)));
+                            resultDPositions.add(nearDistancePosition);
                         }
+                        Collections.sort(resultDPositions);     //오차거리에 따른 오름차순으로 정렬
+
+                        adapter = new PositionPagerAdapter(ShowMiddleActivity.this, list, resultDPositions);
+                        pager.setAdapter(adapter);
+                        indicator.setViewPager(pager);
+                        adapter.registerDataSetObserver(indicator.getDataSetObserver());
+                        adapter.notifyDataSetChanged();
 
                         //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
                         if (getIntent().getStringExtra("activity_tag").equals("group"))
                             saveHistory("D", y, x);
+
                     } catch (JSONException e) { e.printStackTrace(); }
                 }
             };
@@ -404,7 +445,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     //nearStationList의 각 원소를 기준으로 반경 2km내의 지하철 역들 정보(TimeGap) 계산 - API 사용
     void getNearNeighborTime(boolean isNextSearch) {
         if (!isNextSearch) {    //searchTPositions에 값이 존재하지 않으므로 minTimeGaps로 조사함
-            Log.i("stationNoIsNextSearch", "--------->_<---------");
+            Log.d("stationNoIsNextSearch", "--------->_<---------");
             countFinishLoop = nearStationList.size();       //동기화를 맞추기 위한 사이즈 확인
 
             //minTimGapS를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
@@ -422,7 +463,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
 
         else {
-            Log.i("stationIsNextSearch", "--------->_<---------");
+            Log.d("stationIsNextSearch", "--------->_<---------");
             for (ArrayList<StationInfo> nextNearList : nextSearchList) {
                 countFinishLoop += nextNearList.size();
             }
@@ -446,7 +487,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
     //결과를 뽑아내고 출력함
     void resultTMiddle() {
-        Log.i("stationNextNextNextNext", "--------->_<---------");
+        Log.d("stationNextNextNextNext", "--------->_<---------");
         if (resultTPositions.size() == 0) {     //minTimeGaps의 주변 역까지 조사를 했지만 result후보 역이 없을 때
             if (minTimeGapS.getTimeGap() > current.getTimeGap())
                 resultTPositions.add(current);
@@ -458,7 +499,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         Collections.sort(resultTPositions);     //오름차순 정렬함
 
         for (int i=0; i<resultTPositions.size(); i++) {
-            Log.i("stationResult", resultTPositions.get(i).getStationName());
+            Log.d("stationResult", resultTPositions.get(i).getStationName());
         }
 
         //화면에 결과로 포함된 지하철 역 핑 출력
@@ -524,13 +565,19 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 usersPick = usersPick.concat(pi.getUserName()+","+pi.getLatitude()+","+pi.getLongitude()+";");
             }
             usersPick = usersPick.substring(0, usersPick.length()-1);   //마지막 문자 ; 삭제하기
-            Log.i("result", usersPick);
 
             //주변 지하철 역 이름 저장 -> ex.강남,논현,강남구청
             if (standard == "D") {   //거리 기준으로 중간지점 결과를 찾은 경우
-                for (StationInfo station : nearStationList) {
-                    resultStations = resultStations.concat(station.getStation()+",");
+                for (ResultDistancePosition tmpDPosition : resultDPositions) {
+                    if (!tmpDPosition.getStationName().equals("거리상 중간지점"))
+                        resultStations += tmpDPosition.getStationName()+",";
+
+                    for (double distance : tmpDPosition.getDistanceList())
+                        takeTOrD += distance+",";
+                    takeTOrD = takeTOrD.substring(0, takeTOrD.length()-1);   //마지막 문자 , 삭제하기
+                    takeTOrD += ";";
                 }
+
                 resultStations = resultStations.substring(0, resultStations.length()-1);   //마지막 문자 , 삭제하기
             }
             else {      //시간 기준으로 중간지점 결과를 찾은 경우
@@ -539,9 +586,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                     resultSName = resultTPositions.get(0).getStationName();
 
                     for (int i=0; i<size; i++) {    //이외의 역들
-                        if (i!=0) {
+                        if (i!=0)
                             resultStations = resultStations.concat(resultTPositions.get(i).getStationName()+",");
-                        }
 
                         for (RouteInfo personRoute : resultTPositions.get(i).getRouteInfo()) {
                             takeTOrD += personRoute.getTotalTime()+",";
@@ -552,8 +598,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                     resultStations = resultStations.substring(0, resultStations.length()-1);   //마지막 문자 , 삭제하기
                 }
             }
-            Log.i("resultStations", resultStations);
-            Log.i("resultTakeTOrD", takeTOrD);
         }
 
         @Override
@@ -576,5 +620,27 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
             return null;
         }
+    }
+
+    private ArrayList<Double> calTakeDistance(StationInfo station) {
+        ArrayList<Double> takeD = new ArrayList<>();
+
+        for (PositionItem pi : list) {
+            takeD.add(calDistance(station.getStationY(), station.getStationX(), pi.getLatitude(), pi.getLongitude()));
+        }
+
+        return takeD;
+    }
+
+    private double calDistance(double lat1, double long1, double lat2, double long2) {        //위도와 경도 간의 거리를 km로 변환함
+        double theta = long1 - long2;
+        double distance = Math.sin((double)(lat1*Math.PI/180.0)) * Math.sin((double)(lat2*Math.PI/180.0)) + Math.cos((double)(lat1*Math.PI/180.0)) * Math.cos((double)(lat2*Math.PI/180.0)) * Math.cos((double)(theta*Math.PI/180.0));
+
+        distance = Math.acos(distance);
+        distance = (double)(distance*180.0/Math.PI);
+        distance = distance * 60 * 1.1515;      //mile단위
+        distance = distance * 1.609344;         //mile단위->km단위
+
+        return Math.abs(Math.round(distance*100)/100.0);
     }
 }

@@ -37,6 +37,7 @@ public class SelectWhomActivity extends AppCompatActivity {
     boolean isRandom = true;
     RadioGroup rg_selwhom_radiogroup;
     RecyclerView rv_selwhom_grouplist;
+    GroupRecyclerAdapter groupAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +49,15 @@ public class SelectWhomActivity extends AppCompatActivity {
 
         rg_selwhom_radiogroup = (RadioGroup) findViewById(R.id.selectwhom_radiogroup);
         rv_selwhom_grouplist = (RecyclerView) findViewById(R.id.selectwhom_grouplist_rv);        //사용자가 포함된 그룹리스트를 보여줌
-            rv_selwhom_grouplist.setVisibility(View.INVISIBLE);     //그룹리스트 내용 안보이게
-            LinearLayoutManager manager = new LinearLayoutManager(SelectWhomActivity.this, LinearLayoutManager.VERTICAL,false);
-            rv_selwhom_grouplist.setLayoutManager(manager);        //LayoutManager 등록
-            rv_selwhom_grouplist.setAdapter(new GroupRecyclerAdapter(groupList, true));      //어댑터 등록
-            rv_selwhom_grouplist.addItemDecoration(new DividerItemDecoration(SelectWhomActivity.this, 1)); //리스트 사이의 구분선 설정
-            //그룹리스트에 그룹 항목에 대한 배열을 연결해놔야함
+        rv_selwhom_grouplist.setVisibility(View.INVISIBLE);     //그룹리스트 내용 안보이게
+        LinearLayoutManager manager = new LinearLayoutManager(SelectWhomActivity.this, LinearLayoutManager.VERTICAL,false);
+        rv_selwhom_grouplist.setLayoutManager(manager);        //LayoutManager 등록
+        groupAdapter = new GroupRecyclerAdapter(groupList, true);
+        rv_selwhom_grouplist.setAdapter(groupAdapter);      //어댑터 등록
+        rv_selwhom_grouplist.addItemDecoration(new DividerItemDecoration(SelectWhomActivity.this, 1)); //리스트 사이의 구분선 설정
+        //그룹리스트에 그룹 항목에 대한 배열을 연결해놔야함
         btn_selwhom_next = (Button) findViewById(R.id.selectwhom_next);
-            btn_selwhom_next.setEnabled(false);//초기에는 사용자에게 입력받은 내용이 없으므로 버튼을 비활성화함
+        btn_selwhom_next.setEnabled(false);//초기에는 사용자에게 입력받은 내용이 없으므로 버튼을 비활성화함
 
         selectedGroup = new GroupInfo("tmp", "tmp");    //임시로 설정(선택된 그룹 정보 저장)
 
@@ -69,7 +71,10 @@ public class SelectWhomActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.selectwhom_random) {
                     isRandom = true;    //랜덤으로 중간지점 찾기를 할 것이라고 저장
+                    groupAdapter.setSelected_pos(-1);
+                    groupAdapter.notifyDataSetChanged();
                     btn_selwhom_next.setEnabled(true);      //랜덤으로 할 시 버튼이 활성화되어야 함
+
                 }
                 else {
                     isRandom = false;   //그룹으로 중간지점 찾기를 할 것이라고 저장
@@ -119,6 +124,7 @@ public class SelectWhomActivity extends AppCompatActivity {
 
                         //이전에 이 그룹에서 중간 지점 찾기를 한 기록이 있는 지 여부에 따른 수행(기록이 있음-> TRUE)
                         JSONObject groupObject = jsonObject.getJSONObject("group");
+                        Log.d("받은 결과", jsonObject.getString("group"));
                         if (groupObject.getBoolean("historyTF")) {
                             if (groupObject.getJSONArray("usersPick").length() == groupObject.getJSONArray("middleTakeTOrD").length()) {
                                 ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
@@ -134,34 +140,27 @@ public class SelectWhomActivity extends AppCompatActivity {
                                 for (int i=0; i<middleTakeTOrD.length(); i++) {
                                     ghistory.getMiddleTakeTOrD().add(middleTakeTOrD.getJSONObject(i).getDouble("take"));
                                 }
+
                                 JSONArray usersPick = groupObject.getJSONArray("usersPick");
                                 for (int i=0; i<usersPick.length(); i++) {      //history의 중간지점에 대한 사용자들의 위치 선택 정보
                                     ghistory.getUsersPick().add(new PositionItem(usersPick.getJSONObject(i).getString("nickName"), "",
                                             usersPick.getJSONObject(i).getDouble("y"), usersPick.getJSONObject(i).getDouble("x")));
                                 }
-                                JSONArray hisStations = groupObject.getJSONArray("hisStations");    //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
-                                Log.i("resultGHis", String.valueOf(hisStations.length()));
-                                for (int i=0; i<hisStations.length(); i++) {
-                                    //TODO: 첫번째 로그 없으면 hisStations가 2개밖에 안나옴
-                                    Log.i("resultG", "1");
-                                    ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"), hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
 
-                                    Log.i("resultG", "2");
+                                JSONArray hisStations = groupObject.getJSONArray("hisStations");    //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
+                                for (int i=0; i<hisStations.length(); i++) {
+                                    ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"), hisStations.getJSONObject(i).getDouble("stationLong"), hisStations.getJSONObject(i).getDouble("stationLat")));
                                     JSONArray nearTakeTOrD = hisStations.getJSONObject(i).getJSONArray("nearTakeTOrD");      //중간 이외 결과 위치에 대한 사용자들의 소요시간/거리
                                     if (groupObject.getJSONArray("usersPick").length() != nearTakeTOrD.length()) {
                                         extras.putString("history", "noHistory");      //기록 전달(history에 문제가 있으니 보여주지 마라!)
                                         break;
                                     }
-                                    Log.i("resultGNearTake", String.valueOf(nearTakeTOrD.length()));
-                                    Log.i("resultGNearTakeD", hisStations.getJSONObject(i).getString("nearTakeTOrD"));
+
                                     ArrayList<Double> nearTakeTOrDList = new ArrayList<>();
-                                    //TODO: nearTakeTOrD의 길이가 3인데 resultG의 4는 2개밖에 안나옴
                                     for (int j=0; j<nearTakeTOrD.length(); j++) {
-                                        Log.i("resultG", "4");
                                         nearTakeTOrDList.add(nearTakeTOrD.getJSONObject(j).getDouble("take"));
                                     }
                                     ghistory.getNearTakeTOrD().add(new GHistoryInfo.NearStationTakeTOrD(nearTakeTOrDList));
-                                    Log.i("resultG", "5");
                                 }
                             }
                             else
