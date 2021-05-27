@@ -38,10 +38,10 @@ public class ResultDistancePosition implements Comparable<ResultDistancePosition
     public ArrayList<Double> getDistanceList() { return distanceList; }
 
     @Override
-    public int compareTo(ResultDistancePosition ctp) {   //distanceGap값에 대해 오름차순 정렬이 가능하게 함
-        if (this.distanceGap < ctp.getDistanceGap()) {
+    public int compareTo(ResultDistancePosition rdp) {   //distanceGap값에 대해 오름차순 정렬이 가능하게 함
+        if (this.distanceGap < rdp.getDistanceGap()) {
             return -1;
-        } else if (this.distanceGap > ctp.getDistanceGap()) {
+        } else if (this.distanceGap > rdp.getDistanceGap()) {
             return 1;
         }
         return 0;

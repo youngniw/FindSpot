@@ -15,13 +15,11 @@ import static com.example.findspot.SelectWhomActivity.btn_selwhom_next;
 import static com.example.findspot.SelectWhomActivity.selectedGroup;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder>{
-    private ArrayList<GroupInfo> groupList = null;
-    private boolean isSelectWhomActivity = true;
+    private ArrayList<GroupInfo> groupList;
     private int selected_pos = -1;
 
-    public GroupRecyclerAdapter(ArrayList<GroupInfo> groupList, boolean isSelectWhomActivity) {
+    public GroupRecyclerAdapter(ArrayList<GroupInfo> groupList) {
         this.groupList = groupList;
-        this.isSelectWhomActivity = isSelectWhomActivity;
     }
 
     @Override
@@ -66,18 +64,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             itemView.setOnClickListener(new View.OnClickListener() {        //항목을 클릭했을 때
                 @Override
                 public void onClick(View v) {
-                    if (isSelectWhomActivity) {     //SelectWhomActivity에서 그룹의 항목을 클릭할 시
-                        int pos = getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            selected_pos = pos;
-                            notifyDataSetChanged();
-                            selectedGroup.setGroupName(groupList.get(pos).getGroupName());      //그룹이름 수정
-                            selectedGroup.setGHostName(groupList.get(pos).getGHostName());      //그룹방장이름 수정
-                            selectedGroup.setGroupUsers(groupList.get(pos).getGroupUsers());    //그룹에 속한 사용자 목록 수정
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        selected_pos = pos;
+                        notifyDataSetChanged();
+                        selectedGroup.setGroupName(groupList.get(pos).getGroupName());      //그룹이름 수정
+                        selectedGroup.setGHostName(groupList.get(pos).getGHostName());      //그룹방장이름 수정
+                        selectedGroup.setGroupUsers(groupList.get(pos).getGroupUsers());    //그룹에 속한 사용자 목록 수정
 
-                            btn_selwhom_next.setEnabled(true);      //그룹 목록에서의 항목을 선택시 활성화되어야 함
-                            //TODO: 항목선택 시 배경색을 바꾸게 해야함
-                        }
+                        btn_selwhom_next.setEnabled(true);      //그룹 목록에서의 항목을 선택시 활성화되어야 함
                     }
                 }
             });

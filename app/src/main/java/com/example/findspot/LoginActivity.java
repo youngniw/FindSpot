@@ -31,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText et_loginID, et_loginPW;
     Button btn_login, btn_join;
     ImageButton imgbtn_login_kakao, imgbtn_login_naver, imgbtn_login_google, imgbtn_login_facebook;
+    static String nickName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject jsonObject = new JSONObject(response);
                         boolean canLogin = jsonObject.getBoolean("canLogin");   //입력한 ID와 PW로 로그인 가능한 지 여부
                         boolean existID = jsonObject.getBoolean("existID");     //입력한 ID값이 DB에 있는지 여부(로그인 안될 시 원인 파악)
-                        String nickName = jsonObject.getString("nickName");     //해당 ID의 닉네임을 받음
+                        nickName = jsonObject.getString("nickName");     //해당 ID의 닉네임을 받음
 
                         if (canLogin) {     //로그인 가능
                             friendList.clear();     //로그인 시 계속해서 add될 수 있으므로 친구목록 초기화
