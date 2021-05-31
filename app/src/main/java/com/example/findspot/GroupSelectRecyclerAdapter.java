@@ -14,28 +14,28 @@ import java.util.ArrayList;
 import static com.example.findspot.SelectWhomActivity.btn_selwhom_next;
 import static com.example.findspot.SelectWhomActivity.selectedGroup;
 
-public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder>{
+public class GroupSelectRecyclerAdapter extends RecyclerView.Adapter<GroupSelectRecyclerAdapter.GroupViewHolder>{
     private ArrayList<GroupInfo> groupList;
     private int selected_pos = -1;
 
-    public GroupRecyclerAdapter(ArrayList<GroupInfo> groupList) {
+    public GroupSelectRecyclerAdapter(ArrayList<GroupInfo> groupList) {
         this.groupList = groupList;
     }
 
     @Override
-    public GroupRecyclerAdapter.GroupViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GroupSelectRecyclerAdapter.GroupViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         //전개자(Inflater)를 통해 얻은 참조 객체를 통해 뷰홀더 객체 생성
         View view = inflater.inflate(R.layout.grouprow, parent, false);
-        GroupRecyclerAdapter.GroupViewHolder viewHolder = new GroupRecyclerAdapter.GroupViewHolder(view);
+        GroupSelectRecyclerAdapter.GroupViewHolder viewHolder = new GroupSelectRecyclerAdapter.GroupViewHolder(view);
 
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(GroupRecyclerAdapter.GroupViewHolder holder, int position) {
+    public void onBindViewHolder(GroupSelectRecyclerAdapter.GroupViewHolder holder, int position) {
         holder.grouprow_title.setText(groupList.get(position).getGroupName());       //해당 위치를 인덱스로 한 리스트에 저장된 그룹이름을 텍스트로 설정함
         holder.grouprow_users.setText(String.join(", ", groupList.get(position).getGroupUsers()));      //사용자 이름을 ,을 구분자로 사용하여 출력함(ex. 영은, 소은)
         if (position == selected_pos) holder.itemView.setBackgroundColor(Color.parseColor("#D4D4D4"));

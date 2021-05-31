@@ -55,12 +55,12 @@
         android:text="* 이미 중복된 닉네임이 있습니다."
         android:layout_below="@id/nickNameDialog_nickname"/>
 
-<Button
-    android:id="@+id/nickNameDialog_complete"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="10dp"
-    android:layout_alignParentBottom="true"
-    android:textSize="16sp"
-    android:text="완료"/>
+    <Button
+        android:id="@+id/nickNameDialog_complete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_alignParentBottom="true"
+        android:textSize="16sp"
+        android:text="완료"/>
 </RelativeLayout>

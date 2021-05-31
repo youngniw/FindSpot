@@ -37,7 +37,7 @@ public class SelectWhomActivity extends AppCompatActivity {
     boolean isRandom = true;
     RadioGroup rg_selwhom_radiogroup;
     RecyclerView rv_selwhom_grouplist;
-    GroupRecyclerAdapter groupAdapter;
+    GroupSelectRecyclerAdapter groupAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class SelectWhomActivity extends AppCompatActivity {
         rv_selwhom_grouplist.setVisibility(View.INVISIBLE);     //그룹리스트 내용 안보이게
         LinearLayoutManager manager = new LinearLayoutManager(SelectWhomActivity.this, LinearLayoutManager.VERTICAL,false);
         rv_selwhom_grouplist.setLayoutManager(manager);        //LayoutManager 등록
-        groupAdapter = new GroupRecyclerAdapter(groupList);
+        groupAdapter = new GroupSelectRecyclerAdapter(groupList);
         rv_selwhom_grouplist.setAdapter(groupAdapter);      //어댑터 등록
         rv_selwhom_grouplist.addItemDecoration(new DividerItemDecoration(SelectWhomActivity.this, 1)); //리스트 사이의 구분선 설정
         //그룹리스트에 그룹 항목에 대한 배열을 연결해놔야함

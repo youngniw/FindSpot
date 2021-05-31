@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
+import com.example.findspot.dialog.NickNameCheckDialog;
 import com.example.findspot.request.IDCheckRequest;
 import com.example.findspot.request.JoinRequest;
 
@@ -147,8 +148,9 @@ public class JoinActivity extends AppCompatActivity {
                 //마지막으로 닉네임 입력받음
                 NickNameCheckDialog nickNameCheckDialog = new NickNameCheckDialog(JoinActivity.this, new NickNameCheckDialog.NickNameCheckDialogListener() {
                     @Override
-                    public void clickBtn() {    //닉네임 중복확인 완료
+                    public void clickBtn(String userName) {    //닉네임 중복확인 완료
                         //DB에 사용자 계정 추가 요청
+                        nickName = userName;
                         try {
                             new JoinActivity.JoinSubmitTask().execute().get();
                         } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
@@ -222,6 +224,7 @@ public class JoinActivity extends AppCompatActivity {
                         boolean accept = jsonObject.getBoolean("accept");
                         if (accept) {   //회원가입 완료
                             Toast.makeText(getApplicationContext(), "회원가입이 완료되었습니다:) 로그인 부탁드려요!", Toast.LENGTH_SHORT).show();
+                            finish();
                         } else {        //회원가입이 되지 않음
                             Toast.makeText(getApplicationContext(), "회원가입이 되지 않았네요. 다시 작성 부탁드려요!", Toast.LENGTH_SHORT).show();
                         }

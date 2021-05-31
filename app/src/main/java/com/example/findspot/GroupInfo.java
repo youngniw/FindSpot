@@ -14,6 +14,13 @@ public class GroupInfo {
         gUsers = new ArrayList<String>();
     }
 
+    public GroupInfo(String gName, String gHostName, ArrayList<String> gUsers) {
+        super();
+        this.gName = gName;
+        this.gHostName = gHostName;
+        this.gUsers = gUsers;
+    }
+
     public String getGroupName() { return gName; }
     public String getGHostName() { return gHostName; }
     public ArrayList<String> getGroupUsers() { return gUsers; }

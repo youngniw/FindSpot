@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#F9F9F9">
+
+    <LinearLayout
+        android:id="@+id/gDialog_llTitle"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/holo_green_light">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="그룹 추가"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/gDialog_explainName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="추가할 그룹의 이름을 입력해주세요:)"
+        android:paddingTop="25dp"
+        android:paddingBottom="10dp"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:layout_below="@id/gDialog_llTitle" />
+    <EditText
+        android:id="@+id/gDialog_etGroupName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft = "15dp"
+        android:layout_marginRight = "15dp"
+        android:background="@drawable/menu_border"
+        android:layout_below="@id/gDialog_explainName" />
+    <TextView
+        android:id="@+id/gDialog_tvNameAlertMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textColor="#ff0000"
+        android:textSize="11sp"
+        android:text="* 해당 그룹이 이미 존재합니다."
+        android:layout_below="@id/gDialog_etGroupName"/>
+
+    <TextView
+        android:id="@+id/gDialog_explainUsers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="그룹에 포함할 친구를 선택해주세요:)"
+        android:paddingTop="25dp"
+        android:paddingBottom="10dp"
+        android:paddingRight="20dp"
+        android:paddingLeft="20dp"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:layout_below="@id/gDialog_tvNameAlertMsg" />
+    <ListView
+        android:id="@+id/gDialog_lvGroupUsers"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginLeft = "15dp"
+        android:layout_marginRight = "15dp"
+        android:choiceMode="multipleChoice"
+        android:layout_below="@id/gDialog_explainUsers"/>
+    <TextView
+        android:id="@+id/gDialog_tvUsersAlertMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textColor="#ff0000"
+        android:textSize="11sp"
+        android:text="* 1명 이상의 사용자가 포함되어야 합니다."
+        android:layout_below="@id/gDialog_lvGroupUsers" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp"
+        android:layout_below="@id/gDialog_tvUsersAlertMsg">
+        <Button
+            android:id="@+id/gDialog_complete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="완료"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+        <View
+            android:layout_width="20dp"
+            android:layout_height="0dp"/>
+        <Button
+            android:id="@+id/gDialog_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="취소"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</RelativeLayout>
