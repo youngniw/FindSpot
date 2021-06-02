@@ -3,6 +3,9 @@ package com.example.findspot;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.findspot.data.PositionItemInfo;
+import com.example.findspot.data.RouteInfo;
+
 import java.util.ArrayList;
 
 import static com.example.findspot.ShowMiddleActivity.countFinishLoop;
@@ -14,27 +17,27 @@ import static com.example.findspot.ShowMiddleActivity.searchTPositions;
 public class CandidateTimePosition implements Comparable<CandidateTimePosition> {
     private ShowMiddleActivity activity;
     private int whichStation = 0;
-    private int size = 0;       //사용자 수
+    private int size = 0;           //사용자 수
     private int saveCompleteN = 0;  //사용자의 결과가 도출된 개수
-    private int timeGap = 0;    //소요시간이 제일 큰 위치와 작은 위치의 소요시간 차
+    private int timeGap = 0;        //소요시간이 제일 큰 위치와 작은 위치의 소요시간 차
     private String stationName = "";
-    private double resultPositionX = 0.0;       //endX값
-    private double resultPositionY = 0.0;       //endY값
-    private ArrayList<RouteInfo> routes = null;    //사용자별 경로 정보
+    private double resultPositionLat = 0.0;         //endLat값(위도)
+    private double resultPositionLong = 0.0;        //endLong값(경도)
+    private ArrayList<RouteInfo> routes = null;     //사용자별 경로 정보
 
-    CandidateTimePosition(ShowMiddleActivity activity, Context context, int whichStation, ArrayList<PositionItem> list, String stationName, double resultPositionX, double resultPositionY) {
-        this.activity = activity;
+    CandidateTimePosition(Context context, int whichStation, ArrayList<PositionItemInfo> list, String stationName, double resultPositionLat, double resultPositionLong) {
+        this.activity = (ShowMiddleActivity) context;
         this.whichStation = whichStation;
 
         routes = new ArrayList<RouteInfo>();
 
         this.stationName = stationName;
-        this.resultPositionX = resultPositionX;        //임시로 계산할 중간지점 x값(경도)
-        this.resultPositionY = resultPositionY;        //임시로 계산할 중간지점 y값(위도)
+        this.resultPositionLat = resultPositionLat;        //임시로 계산할 중간지점 위도값
+        this.resultPositionLong = resultPositionLong;      //임시로 계산할 중간지점 경도값
         this.size = list.size();
 
         for (int i=0; i<list.size(); i++) {     //중간지점을 찾는 사람들의 거리상의 중간지점과의 시간 오차를 얻어냄
-            new MiddleTime(context, this, list.get(i).getLongitude(), list.get(i).getLatitude(), resultPositionX, resultPositionY);
+            new MiddleTime(context, this, list.get(i).getLongitude(), list.get(i).getLatitude(), resultPositionLong, resultPositionLat);
         }
     }
     CandidateTimePosition() {  //거리상 중간지점을 제외한 소요시간 차가 가장 작은 지하철역을 저장하기 위해 초기 값을 가장 큰 숫자로 해서 추후에 주변 리스트의 값 중 하나가 저장되게 함
@@ -87,7 +90,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 maxTime = routes.get(i).getTotalTime();
         }
         timeGap = maxTime - minTime;
-        Log.i("CTP_stationGap+Name", String.valueOf(timeGap)+": "+ stationName);
+        Log.i("CTP_stationGap+Name", timeGap+": "+ stationName);
 
         switch (whichStation) {
             case 0: {   //거리상 중간 지점에 해당하는 역이 객체일 때
@@ -136,7 +139,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
     public int getSaveCompleteN() { return saveCompleteN; }
     public void addSaveN() { saveCompleteN++; }
     public String getStationName() { return stationName; }
-    public double getResultPositionX() { return resultPositionX; }
-    public double getResultPositionY() { return resultPositionY; }
+    public double getResultPositionLat() { return resultPositionLat; }
+    public double getResultPositionLong() { return resultPositionLong; }
     public ArrayList<RouteInfo> getRouteInfo() { return routes; }
 }

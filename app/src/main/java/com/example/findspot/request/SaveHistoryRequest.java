@@ -1,6 +1,5 @@
 package com.example.findspot.request;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 
@@ -9,7 +8,7 @@ import java.util.Map;
 
 public class SaveHistoryRequest extends StringRequest {
     final static private String URL = "http://222.111.4.158/wheremiddle/savehistory.php";       //php파일 연돌을 위한 서버 URL을 설정
-    private Map<String, String> historyInfo;        //전달할 정보(history로 전달할 정보)
+    private final Map<String, String> historyInfo;        //전달할 정보(history로 전달할 정보)
 
     public SaveHistoryRequest(String gName, String gHostName, String standard, String resultSName, double resultLat, double resultLong, String usersPick, String resultStations, String takeTOrD, Response.Listener<String> listener) {
         super(Method.POST, URL, listener, null);
@@ -27,7 +26,5 @@ public class SaveHistoryRequest extends StringRequest {
     }
 
     @Override
-    protected Map<String, String> getParams() throws AuthFailureError {
-        return historyInfo;
-    }
+    protected Map<String, String> getParams() { return historyInfo; }
 }

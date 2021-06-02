@@ -1,17 +1,17 @@
-package com.example.findspot;
+package com.example.findspot.data;
 
 import java.util.ArrayList;
 
 public class GroupInfo {
-    private String gName = "";          //그룹이름
-    private String gHostName = "";      //그룹방장이름
+    private String gName;          //그룹이름
+    private String gHostName;      //그룹방장이름
     private ArrayList<String> gUsers;   //그룹에 속한 사용자 이름
 
     public GroupInfo(String gName, String gHostName) {
         super();
         this.gName = gName;
         this.gHostName = gHostName;
-        gUsers = new ArrayList<String>();
+        gUsers = new ArrayList<>();
     }
 
     public GroupInfo(String gName, String gHostName, ArrayList<String> gUsers) {

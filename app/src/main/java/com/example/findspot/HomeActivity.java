@@ -9,14 +9,17 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.findspot.data.GroupInfo;
+
 import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity {
+    public static ArrayList<GroupInfo> groupList;
+    static ArrayList<String> friendList;
+
     LinearLayout linear_home_findspot;
     ImageButton imgbtn_home_user;
     TextView tv_home_goFriend, tv_home_goGroup;
-    static ArrayList<String> friendList;
-    static ArrayList<GroupInfo> groupList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

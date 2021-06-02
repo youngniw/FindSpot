@@ -25,18 +25,16 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class AddFriendDialog extends Dialog {
-    private Context context;
-    private AddFriendDialogListener addFriendDialogListener;
-    private String userNickName, friendNick;
-    private ArrayList<String> friendList;
+    private final AddFriendDialogListener addFriendDialogListener;
+    private final String userNickName;
+    private String friendNick;
+    private final ArrayList<String> friendList;
 
     private EditText etGetByUser;
-    private Button btComplete, btCancel;
     private TextView tvAlertMsg;
 
     public AddFriendDialog(@NonNull Context context, AddFriendDialogListener addFriendDialogListener, String userNickName, ArrayList<String> friendList) {
         super(context);
-        this.context = context;
         this.addFriendDialogListener = addFriendDialogListener;
         this.userNickName = userNickName;
         this.friendList = friendList;
@@ -49,8 +47,8 @@ public class AddFriendDialog extends Dialog {
 
         etGetByUser = findViewById(R.id.fDialog_etByUser);
         tvAlertMsg = findViewById(R.id.fDialog_tvAlertMsg);
-        btComplete = findViewById(R.id.fDialog_complete);
-        btCancel = findViewById(R.id.fDialog_cancel);
+        Button btComplete = findViewById(R.id.fDialog_complete);
+        Button btCancel = findViewById(R.id.fDialog_cancel);
 
         //값이 변경될 때,
         etGetByUser.addTextChangedListener(new TextWatcher() {
@@ -69,7 +67,7 @@ public class AddFriendDialog extends Dialog {
         btComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                friendNick = etGetByUser.getText().toString().replaceAll("\\p{Z}","");
+                friendNick = etGetByUser.getText().toString();
 
                 boolean isAlreadyFriend = false;
                 for (int i=0; i<friendList.size(); i++) {
@@ -84,14 +82,9 @@ public class AddFriendDialog extends Dialog {
                     params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
                     params.setMargins(40, 8, 40, 0);
                     tvAlertMsg.setLayoutParams(params);
-                    tvAlertMsg.setText("* 이미 해당 닉네임의 사용자가 친구목록에 포함돼있습니다.");
-                } else if (friendNick.length() == 0) {      //TODO: 확인요망!!!
-                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
-                    params.setMargins(40, 8, 40, 0);
-                    tvAlertMsg.setLayoutParams(params);
-                    tvAlertMsg.setText("* 친구 닉네임을 입력해주세요.");
-                } else {
+                    tvAlertMsg.setText("*이미 해당 닉네임의 사용자가 친구목록에 포함돼있습니다.");
+                }
+                else {
                     Response.Listener<String> responseListener = new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {

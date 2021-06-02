@@ -8,6 +8,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.example.findspot.data.PositionItemInfo;
+
 import static com.example.findspot.ChoiceGPSRandomActivity.address_r;
 import static com.example.findspot.ChoiceGPSGroupActivity.position_tmp;
 
@@ -23,7 +25,7 @@ public class DaumWebViewActivity extends AppCompatActivity {
             String getExtra_nickName = getIntent().getStringExtra("name");
             if (getExtra_nickName.equals("")) address_r = data;
             else {
-                position_tmp.add(new PositionItem(getExtra_nickName, data, 360, 360));
+                position_tmp.add(new PositionItemInfo(getExtra_nickName, data, 360, 360));
             }
 
             Intent intent = new Intent();

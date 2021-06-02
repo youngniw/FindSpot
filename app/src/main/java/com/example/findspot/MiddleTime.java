@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.findspot.data.RouteInfo;
 import com.odsay.odsayandroidsdk.API;
 import com.odsay.odsayandroidsdk.ODsayData;
 import com.odsay.odsayandroidsdk.ODsayService;
@@ -12,8 +13,6 @@ import com.odsay.odsayandroidsdk.OnResultCallbackListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class MiddleTime {
     MiddleTime(Context context, final CandidateTimePosition result, double startX, double startY, double endX, double endY) {

@@ -17,8 +17,8 @@ import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.example.findspot.adapter.FriendListAdapter;
 import com.example.findspot.dialog.AddFriendDialog;
-import com.example.findspot.request.AddFriendRequest;
 import com.example.findspot.request.DelFriendRequest;
 
 import java.util.concurrent.ExecutionException;

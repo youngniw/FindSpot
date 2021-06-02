@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.findspot.adapter.PositionGroupListAdapter;
+import com.example.findspot.data.PositionItemInfo;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +22,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -33,8 +35,8 @@ import static com.example.findspot.SelectWhomActivity.ghistory;
 import static com.example.findspot.SelectWhomActivity.list_g_users;
 
 public class ChoiceGPSGroupActivity extends AppCompatActivity {
-    static ArrayList<PositionItem> position_tmp;    //주소를 받는 타이밍을 겹치지 못하게 순차처리 될 수 있게 하기 위해 사용하는 리스트
-    static ArrayList<PositionItem> list_group;      //중간지점을 찾을 결론적 위치 (이름, 도로명주소, 위도, 경도)로 구성된 리스트
+    public static ArrayList<PositionItemInfo> position_tmp;    //주소를 받는 타이밍을 겹치지 못하게 순차처리 될 수 있게 하기 위해 사용하는 리스트
+    public static ArrayList<PositionItemInfo> list_group;      //중간지점을 찾을 결론적 위치 (이름, 도로명주소, 위도, 경도)로 구성된 리스트
 
     TextView tv_applyhistory;
     Button btn_search_time, btn_search_distance;
@@ -48,10 +50,10 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
 
         String getExtraH = getIntent().getStringExtra("history");
 
-        position_tmp = new ArrayList<PositionItem>();
-        list_group = new ArrayList<PositionItem>();         //TODO: ShowMiddleActivity에서 뒤로가기를 할 때 clear해줘야 함
-        for (PositionItem pi : list_g_users) {
-            list_group.add(new PositionItem(pi.getUserName(), "", 0.0, 0.0));
+        position_tmp = new ArrayList<PositionItemInfo>();
+        list_group = new ArrayList<PositionItemInfo>();         //TODO: ShowMiddleActivity에서 뒤로가기를 할 때 clear해줘야 함
+        for (PositionItemInfo pi : list_g_users) {
+            list_group.add(new PositionItemInfo(pi.getUserName(), "", 0.0, 0.0));
         }
 
         //위치 기록을 위한 그룹 리스트 초기설정
@@ -101,7 +103,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean isNext = true;
-                for (PositionItem pi : list_group) {
+                for (PositionItemInfo pi : list_group) {
                     if (pi.getRoadName().equals("")) {      //입력한 도로명이 없을 시
                         isNext = false;
                         Toast.makeText(getApplicationContext(), "입력하지 않은 위치가 있습니다.", Toast.LENGTH_SHORT).show();
@@ -201,8 +203,6 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 } else {
                     Log.i("통신 결과", hc.getResponseCode() + "에러");
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,7 +18,7 @@ import androidx.annotation.NonNull;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
-import com.example.findspot.GroupInfo;
+import com.example.findspot.data.GroupInfo;
 import com.example.findspot.R;
 import com.example.findspot.request.AddGroupRequest;
 

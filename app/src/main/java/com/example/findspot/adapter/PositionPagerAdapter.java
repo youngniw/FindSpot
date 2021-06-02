@@ -1,5 +1,6 @@
-package com.example.findspot;
+package com.example.findspot.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -10,19 +11,26 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
+
+import com.example.findspot.CandidateTimePosition;
+import com.example.findspot.data.PositionItemInfo;
+import com.example.findspot.R;
+import com.example.findspot.ResultDistancePosition;
+import com.example.findspot.data.RouteInfo;
 
 import java.util.ArrayList;
 
 public class PositionPagerAdapter extends PagerAdapter {
     Context context;
     boolean isHistory, isGroup, isStandardTime;
-    ArrayList<PositionItem> userList = null;
+    ArrayList<PositionItemInfo> userList;
     ArrayList<CandidateTimePosition> tPositions = null;
     ArrayList<ResultDistancePosition> dPositions = null;
 
     //시간 기준 생성자
-    public PositionPagerAdapter(Context context, boolean isHistory, ArrayList<PositionItem> userList, ArrayList<CandidateTimePosition> resultTPositions) {
+    public PositionPagerAdapter(Context context, boolean isHistory, ArrayList<PositionItemInfo> userList, ArrayList<CandidateTimePosition> resultTPositions) {
         isStandardTime = true;
 
         this.context = context;
@@ -33,9 +41,9 @@ public class PositionPagerAdapter extends PagerAdapter {
     }
 
     //거리 기준 생성자
-    public PositionPagerAdapter(Context context, ArrayList<PositionItem> userList, ArrayList<ResultDistancePosition> resultDPositions){
+    public PositionPagerAdapter(Context context, ArrayList<PositionItemInfo> userList, ArrayList<ResultDistancePosition> resultDPositions){
         isStandardTime = false;
-        
+
         this.context = context;
         this.userList = userList;
         isGroup = !userList.get(0).getUserName().equals("");
@@ -44,36 +52,38 @@ public class PositionPagerAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        int size = 0;
+        int size;
         if (isStandardTime)
-            size = tPositions.size() < 5 ? tPositions.size() : 5;
+            size = Math.min(tPositions.size(), 5);
         else
             size = dPositions.size();
         return size;
     }
 
-    public int getItemPosition(Object object) {
+    public int getItemPosition(@NonNull Object object) {
         return POSITION_NONE;
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return (view == (View)object);
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+        return (view == (View) object);
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(ViewGroup container, int position, @NonNull Object object) {
         container.removeView((View) object);
     }
 
-    public Object instantiateItem(ViewGroup container, int position) {
+    @SuppressLint("SetTextI18n")
+    @NonNull
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.viewpager_childview, container, false);
-        
+
         TextView resultStationTV = view.findViewById(R.id.tv_stationName);      //결과 장소 TextView
         TextView gapTV = view.findViewById(R.id.tv_Gap);        //소요시간/거리 차 TextView
         LinearLayout ll_container = (LinearLayout)view.findViewById(R.id.ll_container);
-        
+
         //TODO: 시간과 거리 기준을 나눠야함(isStandardTime) -> 짧게 수정해야 함
         if (isStandardTime) {
             resultStationTV.setText("\uD83D\uDCCD "+tPositions.get(position).getStationName()+"역");
@@ -119,14 +129,14 @@ public class PositionPagerAdapter extends PagerAdapter {
                     userPathTV = new TextView(context);
                     userPathTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
                     userPathTV.setTextColor(Color.BLACK);
-                    String path="";
+                    StringBuilder path= new StringBuilder();
                     ArrayList<RouteInfo.SubPath> tmpPath = tPositions.get(position).getRouteInfo().get(i).getPaths();
                     for(int j=0; j<tPositions.get(position).getRouteInfo().get(i).getPaths().size(); j++) {
-                        if (tmpPath.get(j).getTrafficType() == 1) path += "\uD83D\uDE8A" + tmpPath.get(j).getBoardName() + "(" + tmpPath.get(j).getSubwayName() + ")-";
-                        else if (tmpPath.get(j).getTrafficType() == 2) path += "\uD83D\uDE8C" + tmpPath.get(j).getBoardName() + "(" + tmpPath.get(j).getBusName() + ")-";
+                        if (tmpPath.get(j).getTrafficType() == 1) path.append("\uD83D\uDE8A").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getSubwayName()).append(")-");
+                        else if (tmpPath.get(j).getTrafficType() == 2) path.append("\uD83D\uDE8C").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getBusName()).append(")-");
                     }
-                    path += tPositions.get(position).getStationName() + " 도착";
-                    userPathTV.setText(path);
+                    path.append(tPositions.get(position).getStationName()).append(" 도착");
+                    userPathTV.setText(path.toString());
                     userPathTV.setLayoutParams(tv_params);
                 }
 

@@ -1,4 +1,4 @@
-package com.example.findspot;
+package com.example.findspot.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -7,7 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.findspot.R;
+import com.example.findspot.data.GroupInfo;
 
 import java.util.ArrayList;
 
@@ -15,13 +19,14 @@ import static com.example.findspot.SelectWhomActivity.btn_selwhom_next;
 import static com.example.findspot.SelectWhomActivity.selectedGroup;
 
 public class GroupSelectRecyclerAdapter extends RecyclerView.Adapter<GroupSelectRecyclerAdapter.GroupViewHolder>{
-    private ArrayList<GroupInfo> groupList;
+    private final ArrayList<GroupInfo> groupList;
     private int selected_pos = -1;
 
     public GroupSelectRecyclerAdapter(ArrayList<GroupInfo> groupList) {
         this.groupList = groupList;
     }
 
+    @NonNull
     @Override
     public GroupSelectRecyclerAdapter.GroupViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Context context = parent.getContext();
@@ -29,9 +34,7 @@ public class GroupSelectRecyclerAdapter extends RecyclerView.Adapter<GroupSelect
 
         //전개자(Inflater)를 통해 얻은 참조 객체를 통해 뷰홀더 객체 생성
         View view = inflater.inflate(R.layout.grouprow, parent, false);
-        GroupSelectRecyclerAdapter.GroupViewHolder viewHolder = new GroupSelectRecyclerAdapter.GroupViewHolder(view);
-
-        return viewHolder;
+        return new GroupSelectRecyclerAdapter.GroupViewHolder(view);
     }
 
     @Override
@@ -61,19 +64,16 @@ public class GroupSelectRecyclerAdapter extends RecyclerView.Adapter<GroupSelect
             grouprow_title = itemView.findViewById(R.id.grouprow_title);
             grouprow_users = itemView.findViewById(R.id.grouprow_users);
 
-            itemView.setOnClickListener(new View.OnClickListener() {        //항목을 클릭했을 때
-                @Override
-                public void onClick(View v) {
-                    int pos = getAdapterPosition();
-                    if (pos != RecyclerView.NO_POSITION) {
-                        selected_pos = pos;
-                        notifyDataSetChanged();
-                        selectedGroup.setGroupName(groupList.get(pos).getGroupName());      //그룹이름 수정
-                        selectedGroup.setGHostName(groupList.get(pos).getGHostName());      //그룹방장이름 수정
-                        selectedGroup.setGroupUsers(groupList.get(pos).getGroupUsers());    //그룹에 속한 사용자 목록 수정
+            itemView.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    selected_pos = pos;
+                    notifyDataSetChanged();
+                    selectedGroup.setGroupName(groupList.get(pos).getGroupName());      //그룹이름 수정
+                    selectedGroup.setGHostName(groupList.get(pos).getGHostName());      //그룹방장이름 수정
+                    selectedGroup.setGroupUsers(groupList.get(pos).getGroupUsers());    //그룹에 속한 사용자 목록 수정
 
-                        btn_selwhom_next.setEnabled(true);      //그룹 목록에서의 항목을 선택시 활성화되어야 함
-                    }
+                    btn_selwhom_next.setEnabled(true);      //그룹 목록에서의 항목을 선택시 활성화되어야 함
                 }
             });
         }

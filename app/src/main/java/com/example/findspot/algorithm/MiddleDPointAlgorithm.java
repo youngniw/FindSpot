@@ -1,6 +1,6 @@
 package com.example.findspot.algorithm;
 
-import com.example.findspot.PositionItem;
+import com.example.findspot.data.PositionItemInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class MiddleDPointAlgorithm {
-    HashSet<Position> setPositions = new HashSet<Position>();
+    HashSet<Position> setPositions = new HashSet<>();
 
-    public MiddleDPointAlgorithm(ArrayList<PositionItem> list) {
-        for (PositionItem user : list) {
+    public MiddleDPointAlgorithm(ArrayList<PositionItemInfo> list) {
+        for (PositionItemInfo user : list) {
             setPositions.add(new Position(user.getLatitude(), user.getLongitude()));
         }
     }
@@ -29,19 +29,11 @@ public class MiddleDPointAlgorithm {
             ArrayList<Position> allPosition = new ArrayList<>(setPositions);
 
             /* 알고리즘 시작 */
-            double max = 0.0;
-            for (int i = 0; i < allPosition.size(); i++) {
-                for (int j = 0; j < i; j++) {
-                    double dist = calDistance(allPosition.get(i).getLatitude(), allPosition.get(i).getLongitude(), allPosition.get(j).getLatitude(), allPosition.get(j).getLongitude());
-                    if (dist > max)
-                        max = dist;
-                }
-            }
             //모든 위치간의 거리 구하기
             for (int i = 0; i < allPosition.size(); i++) {
                 for (int j = 0; j < i; j++) {
                     double dist = calDistance(allPosition.get(i).getLatitude(), allPosition.get(i).getLongitude(), allPosition.get(j).getLatitude(), allPosition.get(j).getLongitude());
-                    if (dist < max/3) {   //1km는 임의로 정한 것임(전체 크기를 보고 상대적으로 정해야 되지 않을까..?)
+                    if (dist < 1) {   //1km는 임의로 정한 것임(전체 크기를 보고 상대적으로 정해야 되지 않을까..?)
                         combineCandidates.add(new CombineCandidate(dist, i, allPosition.get(i), j, allPosition.get(j)));    //일정 거리 이내이면 결합 후보 리스트에 추가
                     }
                 }
@@ -60,7 +52,7 @@ public class MiddleDPointAlgorithm {
                         checkedIndex.put(candidateIndex1, candidatePos1);
                         checkedIndex.put(candidateIndex2, candidatePos2);
                         //setPosition에서 삭제
-                        setPositions.remove(candidatePos1);
+                        setPositions.remove(candidatePos1);     //TODO: candidatePos 형식 바꿔야 함
                         setPositions.remove(candidatePos2);
                         //combine된 새로운 위치 생성
                         double newLat = (candidatePos1.getLatitude() + candidatePos2.getLatitude()) / 2;
@@ -95,9 +87,9 @@ public class MiddleDPointAlgorithm {
         return Math.abs(distance);
     }
 
-    public class Position {
-        private double latitude;
-        private double longitude;
+    public static class Position {
+        private final double latitude;
+        private final double longitude;
 
         Position(double latitude, double longitude) {
             this.latitude = latitude;
@@ -128,12 +120,12 @@ public class MiddleDPointAlgorithm {
         }
     }
 
-    public class CombineCandidate implements Comparable<CombineCandidate> {
-        private double distance;    //결합 후보군과의 거리
-        private int index1;         //결합 후보군1의 인덱스 (pos1/2/3..)
-        private Position pos1;      //결합 후보군1의 위치
-        private int index2;         //결합 후보군2의 인덱스 (pos1/2/3..)
-        private Position pos2;      //결합 후보군2의 위치
+    public static class CombineCandidate implements Comparable<CombineCandidate> {
+        private final double distance;    //결합 후보군과의 거리
+        private final int index1;         //결합 후보군1의 인덱스 (pos1/2/3..)
+        private final Position pos1;      //결합 후보군1의 위치
+        private final int index2;         //결합 후보군2의 인덱스 (pos1/2/3..)
+        private final Position pos2;      //결합 후보군2의 위치
 
         //생성자
         public CombineCandidate(double distance, int index1, Position pos1, int index2, Position pos2) {
@@ -152,9 +144,7 @@ public class MiddleDPointAlgorithm {
 
         //거리 기준으로 정렬(오름차순)
         public int compareTo(CombineCandidate c) {
-            if (this.distance > c.getDistance()) { return 1; }
-            else if (this.distance > c.getDistance()) {return -1; }
-            else {return 0; }
+            return Double.compare(this.distance, c.getDistance());
         }
     }
 }

@@ -10,7 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -24,8 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NickNameCheckDialog extends Dialog {
-    private Context context;
-    private NickNameCheckDialogListener nickNameCheckDialogListener;
+    private final NickNameCheckDialogListener nickNameCheckDialogListener;
     String userNickName;
 
     EditText et_dialogNickName;
@@ -34,14 +32,13 @@ public class NickNameCheckDialog extends Dialog {
 
     public NickNameCheckDialog(@NonNull Context context, NickNameCheckDialogListener nickNameCheckDialogListener) {
         super(context);
-        this.context = context;
         this.nickNameCheckDialogListener = nickNameCheckDialogListener;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_nickname_check);
+        setContentView(R.layout.dialog_check_nickname);
 
         et_dialogNickName = findViewById(R.id.nickNameDialog_nickname);
         btn_dialogComplete = findViewById(R.id.nickNameDialog_complete);
@@ -64,45 +61,35 @@ public class NickNameCheckDialog extends Dialog {
         btn_dialogComplete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                userNickName = et_dialogNickName.getText().toString().replaceAll("\\p{Z}","");
+                userNickName = et_dialogNickName.getText().toString();
 
-                if (userNickName.length() == 0) {
-                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    params.addRule(RelativeLayout.BELOW, R.id.nickNameDialog_nickname);
-                    params.setMargins(40, 8, 40, 0);
-                    tv_dialogIsCheckedNickName.setLayoutParams(params);
-                    tv_dialogIsCheckedNickName.setText("* 공백을 제외한 닉네임을 입력해주세요.");
-                }
-                else {
-                    Response.Listener<String> responseListener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject jsonObject = new JSONObject(response);
-                                boolean existNickName = jsonObject.getBoolean("existNickName");
-                                if (existNickName) {    //이미 닉네임이 존재함
-                                    //닉네임 중복 경고 보이게끔.
-                                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                    params.addRule(RelativeLayout.BELOW, R.id.nickNameDialog_nickname);
-                                    params.setMargins(40, 8, 40, 0);
-                                    tv_dialogIsCheckedNickName.setLayoutParams(params);
-                                    tv_dialogIsCheckedNickName.setText("* 이미 중복된 닉네임이 있습니다.");
-                                } else {                //닉네임 사용가능
-                                    //context한테 닉네임 전달하고 거기서 DB Insert 해야함
-                                    nickNameCheckDialogListener.clickBtn(userNickName);     //JoinActivity에서 처리할 수 있도록.
-                                    dismiss();
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                Response.Listener<String> responseListener = new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            boolean existNickName = jsonObject.getBoolean("existNickName");
+                            if (existNickName) {    //이미 닉네임이 존재함
+                                //닉네임 중복 경고 보이게끔.
+                                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                                params.addRule(RelativeLayout.BELOW, R.id.nickNameDialog_nickname);
+                                params.setMargins(40, 8, 40, 0);
+                                tv_dialogIsCheckedNickName.setLayoutParams(params);
+                            } else {                //닉네임 사용가능
+                                //context한테 닉네임 전달하고 거기서 DB Insert 해야함
+                                nickNameCheckDialogListener.clickBtn(userNickName);     //JoinActivity에서 처리할 수 있도록.
+                                dismiss();
                             }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    };
-                    // 서버로 Volley를 이용해서 요청을 함.
-                    NickNameCheckRequest nickNameCheckRequest = new NickNameCheckRequest(userNickName, responseListener);
-                    RequestQueue queue = Volley.newRequestQueue(getContext());
-                    queue.add(nickNameCheckRequest);
-                }
+                    }
+                };
+                // 서버로 Volley를 이용해서 요청을 함.
+                NickNameCheckRequest nickNameCheckRequest = new NickNameCheckRequest(userNickName, responseListener);
+                RequestQueue queue = Volley.newRequestQueue(getContext());
+                queue.add(nickNameCheckRequest);
             }
         });
     }

@@ -21,6 +21,9 @@ import java.util.concurrent.ExecutionException;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.findspot.adapter.PositionListAdapter;
+import com.example.findspot.data.PositionItemInfo;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +37,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
 
     EditText et_position;
     Button btn_add, btn_search_time, btn_search_distance;
-    static ArrayList<PositionItem> list_random;       //(도로명주소,위도,경도)로 구성된 리스트
+    static ArrayList<PositionItemInfo> list_random;       //(도로명주소,위도,경도)로 구성된 리스트
     PositionListAdapter listAdapter;    //위치 리스트 어댑터(UI 구현)
 
     @Override
@@ -42,7 +45,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choice_gps_random);
 
-        list_random = new ArrayList<PositionItem>();
+        list_random = new ArrayList<PositionItemInfo>();
 
         //위치 기록을 위한 리스트 초기설정
         listAdapter = new PositionListAdapter(this, R.layout.positionrow, list_random);
@@ -85,7 +88,7 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
             public void onClick(View v) {   //"추가" 버튼을 클릭함으로써 위치를 추가하고 싶은 경우
                 String name = et_position.getText().toString();
 
-                //좌표제공API로 위도경도 알아내고, PositionItem에 값 넣기
+                //좌표제공API로 위도경도 알아내고, PositionItemInfo에 값 넣기
                 double longitude = 0.0, latitude = 0.0;
                 if ((name.equals(""))) {    //도로명주소가 입력되지 않았는데 '추가'버튼을 클릭할 경우
                     Toast.makeText(ChoiceGPSRandomActivity.this.getApplicationContext(), "주소가 입력되지 않았습니다.", Toast.LENGTH_SHORT).show();
@@ -103,8 +106,8 @@ public class ChoiceGPSRandomActivity extends AppCompatActivity {
                     longitude = Double.parseDouble(resultXY[0]);    //string에서 double로 형변환
                     latitude = Double.parseDouble(resultXY[1]);     //string에서 double로 형변환
 
-                    PositionItem item = new PositionItem(name, latitude, longitude);    //PositionItem 생성
-                    list_random.add(item);      //리스트에 PositionItem 추가
+                    PositionItemInfo item = new PositionItemInfo(name, latitude, longitude);    //PositionItemInfo 생성
+                    list_random.add(item);      //리스트에 PositionItemInfo 추가
                     et_position.setText("");    //et_position 초기화
                     listAdapter.notifyDataSetChanged(); //리스트 갱신
                 }
