@@ -29,7 +29,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
         this.activity = (ShowMiddleActivity) context;
         this.whichStation = whichStation;
 
-        routes = new ArrayList<RouteInfo>();
+        routes = new ArrayList<>();
 
         this.stationName = stationName;
         this.resultPositionLat = resultPositionLat;        //임시로 계산할 중간지점 위도값
@@ -61,7 +61,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
         }
         timeGap = max.intValue()-min.intValue();
 
-        routes = new ArrayList<RouteInfo>();
+        routes = new ArrayList<>();
         for (Double take : takeTimeList) {
             routes.add(new RouteInfo(4, take.intValue(), 0));
         }
@@ -101,7 +101,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 break;
             }
             case 1: {   //거리상 중간 지점 근처 역에 해당하는 객체일 때
-                activity.countFinishLoop--;
+                countFinishLoop--;
 
                 if (timeGap < minTimeGapS.getTimeGap())
                     minTimeGapS = this;   //주변 역들 중 소요시간 최소로 저장함
@@ -119,7 +119,7 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 break;
             }
             case 2: {   //거리 상 중간 지점의 근처 역중 가장 소요시간이 작은 역의 근처역 or SearchTPositions의 역을 기준으로 하는 근처 역에 해당하는 객체일 때
-                activity.countFinishLoop--;
+                countFinishLoop--;
 
                 if (timeGap < minTimeGapS.getTimeGap())
                     minTimeGapS = this;   //주변 역들 중 소요시간 최소로 저장함

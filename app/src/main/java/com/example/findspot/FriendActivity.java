@@ -1,5 +1,6 @@
 package com.example.findspot;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
-import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
@@ -46,18 +46,15 @@ public class FriendActivity extends AppCompatActivity {
             //swipe end: 이때 smoothOpenMenu() 호출해야 메뉴바가 고정됨
             public void onSwipeEnd(int position) { listview.smoothOpenMenu(position); }
         });
-        listview.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index) {
-                    case 0: //delete
-                        try {
-                            new DelFriendTask(friendList.get(position)).execute().get();   //서버에게 삭제요청
-                        } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
-                        break;
+        listview.setOnMenuItemClickListener((position, menu, index) -> {
+            if (index == 0) { //delete
+                try {
+                    new DelFriendTask(friendList.get(position)).execute().get();   //서버에게 삭제요청
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
                 }
-                return false;
             }
+            return false;
         });
         ImageButton addFriendBtn = (ImageButton) findViewById(R.id.friend_add);
         addFriendBtn.setOnClickListener(listener);
@@ -67,47 +64,43 @@ public class FriendActivity extends AppCompatActivity {
     View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddFriendDialog addFriendDialog = new AddFriendDialog(FriendActivity.this, new AddFriendDialog.AddFriendDialogListener() {
-                @Override
-                public void clickCompleteBt(String friendNick) {
-                    friendList.add(friendNick);     //친구리스트에 추가
-                    adapter.notifyDataSetChanged();
-                }
+            AddFriendDialog addFriendDialog = new AddFriendDialog(FriendActivity.this, friendNick -> {
+                friendList.add(friendNick);     //친구리스트에 추가
+                adapter.notifyDataSetChanged();
             }, nickName, friendList);
             addFriendDialog.show();
         }
     };
 
     //스와이프 했을 때 나올 삭제 메뉴
-    SwipeMenuCreator creator = new SwipeMenuCreator() {
-        @Override
-        public void create(SwipeMenu menu) {
-            //create "delete" item
-            SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
-            openItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25))); //set background
-            openItem.setWidth(150);     //set width
-            openItem.setTitle("삭제");    //set title
-            openItem.setTitleSize(18);    //set title font size
-            openItem.setTitleColor(Color.WHITE);    //set title font color
-            menu.addMenuItem(openItem); //add to menu
-        }
+    SwipeMenuCreator creator = menu -> {
+        //create "delete" item
+        SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
+        openItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25))); //set background
+        openItem.setWidth(150);     //set width
+        openItem.setTitle("삭제");    //set title
+        openItem.setTitleSize(18);    //set title font size
+        openItem.setTitleColor(Color.WHITE);    //set title font color
+        menu.addMenuItem(openItem); //add to menu
     };
 
     //서버에게 해당 친구의 삭제를 요청함
+    @SuppressLint("StaticFieldLeak")
     public class DelFriendTask extends AsyncTask<String, Void, String> {
         String delFriend;
 
-        DelFriendTask(String delFriend) { this.delFriend = delFriend; }
+        DelFriendTask(String delFriend) {
+            super();
+
+            this.delFriend = delFriend;
+        }
 
         @Override
         protected String doInBackground(String... strings) {
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    friendList.remove(delFriend);
-                    adapter.notifyDataSetChanged();   //리스트뷰 새로고침
-                    Toast.makeText(FriendActivity.this, "친구 삭제가 완료됐습니다.", Toast.LENGTH_SHORT).show();
-                }
+            Response.Listener<String> responseListener = response -> {
+                friendList.remove(delFriend);
+                adapter.notifyDataSetChanged();   //리스트뷰 새로고침
+                Toast.makeText(FriendActivity.this, "친구 삭제가 완료됐습니다.", Toast.LENGTH_SHORT).show();
             };
             // 서버로 Volley를 이용해서 요청을 함
             DelFriendRequest delFriendRequest = new DelFriendRequest(nickName, delFriend, responseListener);

@@ -1,5 +1,6 @@
 package com.example.findspot;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
-import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
@@ -46,17 +46,13 @@ public class GroupActivity extends AppCompatActivity {
             //swipe end: 이때 smoothOpenMenu() 호출해야 메뉴바가 고정됨
             public void onSwipeEnd(int position) { listview.smoothOpenMenu(position); }
         });
-        listview.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index) {
-                    case 0: //delete
-                        new DelGroupTask(groupList.get(position)).execute();   //서버에게 삭제요청
-                        groupList.remove(position);         //groupList에서 삭제
-                        adapter.notifyDataSetChanged();
-                }
-                return false;
+        listview.setOnMenuItemClickListener((position, menu, index) -> {
+            if (index == 0) { //delete
+                new DelGroupTask(groupList.get(position)).execute();   //서버에게 삭제요청
+                groupList.remove(position);         //groupList에서 삭제
+                adapter.notifyDataSetChanged();
             }
+            return false;
         });
         ImageButton addGroupBtn = (ImageButton) findViewById(R.id.group_add);
         addGroupBtn.setOnClickListener(listener);
@@ -67,47 +63,43 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             //TODO: 다이얼로그로 친구 선택 리스트 보여주고 친구 선택하고 완료 버튼 누르면 그룹명 입력받고 서버에게 요청
-            AddGroupDialog addGroupDialog = new AddGroupDialog(GroupActivity.this, new AddGroupDialog.AddGroupDialogListener() {
-                @Override
-                public void clickCompleteBt(GroupInfo group) {
-                    groupList.add(group);
-                    adapter.notifyDataSetChanged();
-                }
+            AddGroupDialog addGroupDialog = new AddGroupDialog(GroupActivity.this, group -> {
+                groupList.add(group);
+                adapter.notifyDataSetChanged();
             }, nickName, friendList);
             addGroupDialog.show();
         }
     };
 
     //스와이프 했을 때 나올 삭제 메뉴
-    SwipeMenuCreator creator = new SwipeMenuCreator() {
-        @Override
-        public void create(SwipeMenu menu) {
-            //create "delete" item
-            SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
-            openItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25))); //set background
-            openItem.setWidth(150);     //set width
-            openItem.setTitle("삭제");    //set title
-            openItem.setTitleSize(18);    //set title font size
-            openItem.setTitleColor(Color.WHITE);    //set title font color
-            menu.addMenuItem(openItem); //add to menu
-        }
+    SwipeMenuCreator creator = menu -> {
+        //create "delete" item
+        SwipeMenuItem openItem = new SwipeMenuItem(getApplicationContext());
+        openItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25))); //set background
+        openItem.setWidth(150);     //set width
+        openItem.setTitle("삭제");    //set title
+        openItem.setTitleSize(18);    //set title font size
+        openItem.setTitleColor(Color.WHITE);    //set title font color
+        menu.addMenuItem(openItem); //add to menu
     };
 
     //서버에게 해당 그룹의 삭제를 요청함
+    @SuppressLint("StaticFieldLeak")
     public class DelGroupTask extends AsyncTask<String, Void, String> {
         GroupInfo delGroup;
+
         DelGroupTask(GroupInfo delGroup) {
+            super();
+
             this.delGroup = delGroup;
         }
+
         @Override
         protected String doInBackground(String... strings) {
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    groupList.remove(delGroup);
-                    adapter.notifyDataSetChanged();
-                    Toast.makeText(GroupActivity.this, "그룹 삭제가 완료됐습니다.", Toast.LENGTH_SHORT).show();
-                }
+            Response.Listener<String> responseListener = response -> {
+                groupList.remove(delGroup);
+                adapter.notifyDataSetChanged();
+                Toast.makeText(GroupActivity.this, "그룹 삭제가 완료됐습니다.", Toast.LENGTH_SHORT).show();
             };
 
             DelGroupRequest delGroupRequest = new DelGroupRequest(delGroup, responseListener);

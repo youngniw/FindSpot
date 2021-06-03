@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -64,61 +63,50 @@ public class AddFriendDialog extends Dialog {
         });
 
         //"완료"버튼 눌렀을 때,
-        btComplete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                friendNick = etGetByUser.getText().toString();
+        btComplete.setOnClickListener(v -> {
+            friendNick = etGetByUser.getText().toString();
 
-                boolean isAlreadyFriend = false;
-                for (int i=0; i<friendList.size(); i++) {
-                    if (friendList.get(i).equals(friendNick)) {
-                        isAlreadyFriend = true;
-                        break;
-                    }
+            boolean isAlreadyFriend = false;
+            for (int i=0; i<friendList.size(); i++) {
+                if (friendList.get(i).equals(friendNick)) {
+                    isAlreadyFriend = true;
+                    break;
                 }
+            }
 
-                if (isAlreadyFriend) {      //사용자가 이미 친구인 경우
-                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                    params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
-                    params.setMargins(40, 8, 40, 0);
-                    tvAlertMsg.setLayoutParams(params);
-                    tvAlertMsg.setText("*이미 해당 닉네임의 사용자가 친구목록에 포함돼있습니다.");
-                }
-                else {
-                    Response.Listener<String> responseListener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject jsonObject = new JSONObject(response);
-                                boolean canAddFriend = jsonObject.getBoolean("canAdd");
-                                if (canAddFriend) {
-                                    addFriendDialogListener.clickCompleteBt(friendNick);
-                                    dismiss();      //TODO: 안됨!!
-                                } else {
-                                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                    params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
-                                    params.setMargins(40, 8, 40, 0);
-                                    tvAlertMsg.setLayoutParams(params);
-                                    tvAlertMsg.setText("* 해당 닉네임의 유저는 존재하지 않습니다.");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+            if (isAlreadyFriend) {      //사용자가 이미 친구인 경우
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
+                params.setMargins(40, 8, 40, 0);
+                tvAlertMsg.setLayoutParams(params);
+                tvAlertMsg.setText("*이미 해당 닉네임의 사용자가 친구목록에 포함돼있습니다.");
+            }
+            else {
+                Response.Listener<String> responseListener = response -> {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        boolean canAddFriend = jsonObject.getBoolean("canAdd");
+                        if (canAddFriend) {
+                            addFriendDialogListener.clickCompleteBt(friendNick);
+                            dismiss();      //TODO: 안됨!!
+                        } else {
+                            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);
+                            params.setMargins(40, 8, 40, 0);
+                            tvAlertMsg.setLayoutParams(params);
+                            tvAlertMsg.setText("* 해당 닉네임의 유저는 존재하지 않습니다.");
                         }
-                    };
-                    AddFriendRequest addFriendRequest = new AddFriendRequest(userNickName, friendNick, responseListener);
-                    RequestQueue queue = Volley.newRequestQueue(getContext());
-                    queue.add(addFriendRequest);
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                };
+                AddFriendRequest addFriendRequest = new AddFriendRequest(userNickName, friendNick, responseListener);
+                RequestQueue queue = Volley.newRequestQueue(getContext());
+                queue.add(addFriendRequest);
             }
         });
 
-        btCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        btCancel.setOnClickListener(v -> dismiss());
     }
 
     public interface AddFriendDialogListener {

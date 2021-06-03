@@ -28,15 +28,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class AddGroupDialog extends Dialog {
-    private Context context;
-    private AddGroupDialogListener addGroupDialogListener;
-    private String userNickName;
-    private ArrayList<String> friendList;
+    private final Context context;
+    private final AddGroupDialogListener addGroupDialogListener;
+    private final String userNickName;
+    private final ArrayList<String> friendList;
 
     private EditText etGroupName;
     private TextView tvNameAlertMsg, tvUsersAlertMsg;
     private ListView lvFriendList;
-    private Button btComplete, btCancel;
 
     public AddGroupDialog(@NonNull Context context, AddGroupDialogListener addGroupDialogListener, String userNickName, ArrayList<String> friendList) {
         super(context);
@@ -53,14 +52,14 @@ public class AddGroupDialog extends Dialog {
 
         etGroupName = findViewById(R.id.gDialog_etGroupName);
         tvNameAlertMsg = findViewById(R.id.gDialog_tvNameAlertMsg);
-            tvNameAlertMsg.setVisibility(View.INVISIBLE);
+        tvNameAlertMsg.setVisibility(View.INVISIBLE);
         lvFriendList = findViewById(R.id.gDialog_lvGroupUsers);
-            ArrayAdapter adapter = new ArrayAdapter(context, android.R.layout.simple_list_item_multiple_choice, friendList);
-            lvFriendList.setAdapter(adapter);
+        ArrayAdapter adapter = new ArrayAdapter(context, android.R.layout.simple_list_item_multiple_choice, friendList);
+        lvFriendList.setAdapter(adapter);
         tvUsersAlertMsg = findViewById(R.id.gDialog_tvUsersAlertMsg);
-            tvUsersAlertMsg.setVisibility(View.INVISIBLE);
-        btComplete = findViewById(R.id.gDialog_complete);
-        btCancel = findViewById(R.id.gDialog_cancel);
+        tvUsersAlertMsg.setVisibility(View.INVISIBLE);
+        Button btComplete = findViewById(R.id.gDialog_complete);
+        Button btCancel = findViewById(R.id.gDialog_cancel);
 
         //값이 변경될 때,
         etGroupName.addTextChangedListener(new TextWatcher() {
@@ -75,62 +74,53 @@ public class AddGroupDialog extends Dialog {
             public void afterTextChanged(Editable s) { }
         });
 
+
+
         //"완료"버튼 눌렀을 때,
-        btComplete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String groupName = etGroupName.getText().toString().replaceAll("\\p{Z}","");        //TODO: 공백 제거
-                ArrayList<String> groupUsers = new ArrayList<>();
-                groupUsers.add(userNickName);
+        btComplete.setOnClickListener(v -> {
+            String groupName = etGroupName.getText().toString();
+            ArrayList<String> groupUsers = new ArrayList<>();
+            groupUsers.add(userNickName);
 
-                SparseBooleanArray checkedItemPositions = lvFriendList.getCheckedItemPositions();   //리스트뷰에서 선택된 아이템 목록
-                for (int i=0; i<checkedItemPositions.size(); i++ ) {
-                    int pos = checkedItemPositions.keyAt(i);
+            SparseBooleanArray checkedItemPositions = lvFriendList.getCheckedItemPositions();   //리스트뷰에서 선택된 아이템 목록
+            for (int i=0; i<checkedItemPositions.size(); i++ ) {
+                int pos = checkedItemPositions.keyAt(i);
 
-                    if (checkedItemPositions.valueAt(i)) {
-                        groupUsers.add(lvFriendList.getItemAtPosition(pos).toString());
-                    }
+                if (checkedItemPositions.valueAt(i)) {
+                    groupUsers.add(lvFriendList.getItemAtPosition(pos).toString());
                 }
+            }
 
-                if (groupName.length()==0) {
-                    tvNameAlertMsg.setVisibility(View.VISIBLE);
-                    tvNameAlertMsg.setText("* 그룹 이름을 입력해주세요.");
-                } else if (groupUsers.size() == 1) {      //리스트뷰 0명 선택 시
-                    tvUsersAlertMsg.setVisibility(View.VISIBLE);
-                }
-                else {
-                    GroupInfo tmpGroup = new GroupInfo(groupName, userNickName, groupUsers);
-                    Response.Listener<String> responseListener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject jsonObject = new JSONObject(response);
-                                boolean canAddGroup = jsonObject.getBoolean("canAdd");
-                                if (canAddGroup) {
-                                    addGroupDialogListener.clickCompleteBt(tmpGroup);
-                                    dismiss();
-                                } else {
-                                    tvNameAlertMsg.setVisibility(View.VISIBLE);
-                                    tvNameAlertMsg.setText("* 해당 그룹이 이미 존재합니다.");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+            if (groupName.length()==0) {
+                tvNameAlertMsg.setVisibility(View.VISIBLE);
+                tvNameAlertMsg.setText("* 그룹 이름을 입력해주세요.");
+            } else if (groupUsers.size() == 1) {      //리스트뷰 0명 선택 시
+                tvUsersAlertMsg.setVisibility(View.VISIBLE);
+            }
+            else {
+                final GroupInfo tmpGroup = new GroupInfo(groupName, userNickName, groupUsers);
+                Response.Listener<String> responseListener = response -> {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        boolean canAddGroup = jsonObject.getBoolean("canAdd");
+                        if (canAddGroup) {
+                            addGroupDialogListener.clickCompleteBt(tmpGroup);
+                            dismiss();      //TODO: 안됨!!
+                        } else {
+                            tvNameAlertMsg.setVisibility(View.VISIBLE);
+                            tvNameAlertMsg.setText("* 해당 그룹이 이미 존재합니다.");
                         }
-                    };
-                    AddGroupRequest addGroupRequest = new AddGroupRequest(tmpGroup, responseListener);
-                    RequestQueue queue = Volley.newRequestQueue(getContext());
-                    queue.add(addGroupRequest);
-                }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                };
+                AddGroupRequest addGroupRequest = new AddGroupRequest(tmpGroup, responseListener);
+                RequestQueue queue = Volley.newRequestQueue(getContext());
+                queue.add(addGroupRequest);
             }
         });
 
-        btCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        btCancel.setOnClickListener(v -> dismiss());
     }
 
     public interface AddGroupDialogListener {

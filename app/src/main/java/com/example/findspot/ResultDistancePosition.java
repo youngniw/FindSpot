@@ -3,12 +3,12 @@ package com.example.findspot;
 import java.util.ArrayList;
 
 public class ResultDistancePosition implements Comparable<ResultDistancePosition> {
-    private int size = 0;               //사용자 수
-    private double distanceGap = 0.0;   //지하철까지 거리가 제일 먼 사용자의 위치와 가까운 사용자의 위치의 거리차(km단위)
-    private String stationName = "";    //지하철 역 이름
-    private double resultPositionLat = 0.0;         //역의 위도값
-    private double resultPositionLong = 0.0;        //역의 경도값
-    private ArrayList<Double> distanceList = null;    //사용자별 해당 역까지의 거리(km단위)
+    private final int size;                   //사용자 수
+    private final double distanceGap;         //지하철까지 거리가 제일 먼 사용자의 위치와 가까운 사용자의 위치의 거리차(km단위)
+    private final String stationName;         //지하철 역 이름
+    private final double resultPositionLat;   //역의 위도값
+    private final double resultPositionLong;  //역의 경도값
+    private final ArrayList<Double> distanceList; //사용자별 해당 역까지의 거리(km단위)
 
     ResultDistancePosition(int size, String stationName, double resultPositionLat, double resultPositionLong, ArrayList<Double> distanceList){
         this.size = size;

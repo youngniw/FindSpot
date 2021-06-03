@@ -1,5 +1,6 @@
 package com.example.findspot;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -71,12 +72,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         mapViewContainer.addView(mapView);
 
         ImageButton wholegps = findViewById(R.id.shownmiddle_viewAllUser);
-        wholegps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapView.fitMapViewAreaToShowAllPOIItems();
-            }
-        });
+        wholegps.setOnClickListener(v -> mapView.fitMapViewAreaToShowAllPOIItems());
 
 
         //이전 Activity에 따라 사용할 list 설정
@@ -137,7 +133,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 }
                 Collections.sort(resultDPositions);     //오차거리에 따른 오름차순으로 정렬
                 resultDPositions.add(0, middleDistancePosition);    //중간지점역 0번째로 수동 저장
-                
+
                 adapter = new PositionPagerAdapter(this, list, resultDPositions);
                 pager.setAdapter(adapter);
                 indicator.setViewPager(pager);
@@ -245,12 +241,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) { }
 
     //입력한 값들에 대한 거리 기준 중간지점을 위한 작업 수행함
+    @SuppressLint("StaticFieldLeak")
     public class GetDStationTask extends AsyncTask<String, Void, String> {
         ResultDistancePosition middleDistancePosition;
-        double latitude = 0.0;
-        double longitude = 0.0;
+        double latitude;
+        double longitude;
 
         GetDStationTask(ResultDistancePosition middleDistancePosition, double latitude, double longitude) {
+            super();
             this.middleDistancePosition = middleDistancePosition;
             this.latitude = latitude;
             this.longitude = longitude;
@@ -259,50 +257,47 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         @Override
         protected String doInBackground(String... strings) {
             //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);   //전달한 위치 근처의 5개 지하철 역 정보(이름, 경도, 위도)를 받음
+            Response.Listener<String> responseListener = response -> {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);   //전달한 위치 근처의 5개 지하철 역 정보(이름, 경도, 위도)를 받음
 
-                        //근처 역 정보 리스트에 저장(5개 값)
-                        JSONArray nearStationArray = jsonObject.getJSONArray("nearStation");
-                        for (int i=0; i<nearStationArray.length(); i++) {
-                            String nearStationName = nearStationArray.getJSONObject(i).getString("station");
-                            double nearLat = nearStationArray.getJSONObject(i).getDouble("y");
-                            double nearLong = nearStationArray.getJSONObject(i).getDouble("x");
-                            StationInfo nearStation = new StationInfo(nearStationName, nearLat, nearLong);
-                            nearStationList.add(nearStation);
-                            Log.d("nearStation", nearStationName);
+                    //근처 역 정보 리스트에 저장(5개 값)
+                    JSONArray nearStationArray = jsonObject.getJSONArray("nearStation");
+                    for (int i=0; i<nearStationArray.length(); i++) {
+                        String nearStationName = nearStationArray.getJSONObject(i).getString("station");
+                        double nearLat = nearStationArray.getJSONObject(i).getDouble("y");
+                        double nearLong = nearStationArray.getJSONObject(i).getDouble("x");
+                        StationInfo nearStation = new StationInfo(nearStationName, nearLat, nearLong);
+                        nearStationList.add(nearStation);
+                        Log.d("nearStation", nearStationName);
 
-                            //5개의 지하철역의 핑 설정
-                            MapPOIItem station = new MapPOIItem();
-                            station.setMarkerType(MapPOIItem.MarkerType.CustomImage);
-                            station.setCustomImageResourceId(R.drawable.subwaypin_75);
-                            station.setSelectedMarkerType(null);                       //선택 효과 마커 타입
-                            station.setItemName(nearStationName+"역");   //ping 선택 후 말풍선에 보여질 내용
-                            station.setMapPoint(MapPoint.mapPointWithGeoCoord(nearLat, nearLong));     //ping 위치 지정
-                            mapView.addPOIItem(station);   //지도에 ping 추가
+                        //5개의 지하철역의 핑 설정
+                        MapPOIItem station = new MapPOIItem();
+                        station.setMarkerType(MapPOIItem.MarkerType.CustomImage);
+                        station.setCustomImageResourceId(R.drawable.subwaypin_75);
+                        station.setSelectedMarkerType(null);                       //선택 효과 마커 타입
+                        station.setItemName(nearStationName+"역");   //ping 선택 후 말풍선에 보여질 내용
+                        station.setMapPoint(MapPoint.mapPointWithGeoCoord(nearLat, nearLong));     //ping 위치 지정
+                        mapView.addPOIItem(station);   //지도에 ping 추가
 
-                            //근처 역에 대한 middleTakeD 저장
-                            ResultDistancePosition nearDistancePosition = new ResultDistancePosition(list.size(), nearStationName, nearLat, nearLong, calTakeDistance(new StationInfo(nearStationName, nearLat, nearLong)));
-                            resultDPositions.add(nearDistancePosition);
-                        }
-                        Collections.sort(resultDPositions);     //오차거리에 따른 오름차순으로 정렬
-                        resultDPositions.add(0, middleDistancePosition);    //중간지점역 0번째로 수동 저장
+                        //근처 역에 대한 middleTakeD 저장
+                        ResultDistancePosition nearDistancePosition = new ResultDistancePosition(list.size(), nearStationName, nearLat, nearLong, calTakeDistance(new StationInfo(nearStationName, nearLat, nearLong)));
+                        resultDPositions.add(nearDistancePosition);
+                    }
+                    Collections.sort(resultDPositions);     //오차거리에 따른 오름차순으로 정렬
+                    resultDPositions.add(0, middleDistancePosition);    //중간지점역 0번째로 수동 저장
 
-                        adapter = new PositionPagerAdapter(ShowMiddleActivity.this, list, resultDPositions);
-                        pager.setAdapter(adapter);
-                        indicator.setViewPager(pager);
-                        adapter.registerDataSetObserver(indicator.getDataSetObserver());
-                        adapter.notifyDataSetChanged();
+                    adapter = new PositionPagerAdapter(ShowMiddleActivity.this, list, resultDPositions);
+                    pager.setAdapter(adapter);
+                    indicator.setViewPager(pager);
+                    adapter.registerDataSetObserver(indicator.getDataSetObserver());
+                    adapter.notifyDataSetChanged();
 
-                        //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
-                        if (getIntent().getStringExtra("activity_tag").equals("group"))
-                            saveHistory("D", latitude, longitude);
+                    //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
+                    if (getIntent().getStringExtra("activity_tag").equals("group"))
+                        saveHistory("D", latitude, longitude);
 
-                    } catch (JSONException e) { e.printStackTrace(); }
-                }
+                } catch (JSONException e) { e.printStackTrace(); }
             };
             // 서버로 Volley를 이용해서 요청을 함
             GetDMiddleRequest getDMiddleRequest = new GetDMiddleRequest(String.valueOf(latitude), String.valueOf(longitude), responseListener);    //반경을 radius로(km) 하며 위치를 줌
@@ -314,14 +309,16 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     }
 
     //입력한 값들에 대한 시간 기준 중간지점을 위한 작업 수행함
+    @SuppressLint("StaticFieldLeak")
     public class GetTStationTask extends AsyncTask<String, Void, String> {
         boolean isDistanceMiddle;
         int index = -1;
-        double latitude = 0.0;
-        double longitude = 0.0;
-        int radius = 0;
+        double latitude;
+        double longitude;
+        int radius;
 
         GetTStationTask(boolean isDistanceMiddle, double latitude, double longitude, int radius) {
+            super();
             this.isDistanceMiddle = isDistanceMiddle;
             this.latitude = latitude;
             this.longitude = longitude;
@@ -329,6 +326,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
 
         GetTStationTask(boolean isDistanceMiddle, int index, double latitude, double longitude, int radius) {
+            super();
             this.isDistanceMiddle = isDistanceMiddle;
             this.index = index;
             this.latitude = latitude;
@@ -339,43 +337,39 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         @Override
         protected String doInBackground(String... strings) {
             //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);   //(거리상 중간지점 가장 근처의 역 or 중심으로 하고자하는 역)과 그 역 반경 radius(km)이내의 지하철 역 정보들을 받음
-                        if (jsonObject.getBoolean("isDistanceMiddle")) {   //거리상 중간지점인 위치를 전달해 해당 위치와 가장 가까운 지하철역과 그 역 주변 반경 radius내의 지하철역 리스트를 받기 위한 경우
-                            //전달한 위치인 거리상 중간 지점과 가장 가까운 역 정보 저장
-                            String simularStationName = jsonObject.getJSONObject("simularStation").getString("station");
-                            double simularLat = jsonObject.getJSONObject("simularStation").getDouble("y");
-                            double simularLong = jsonObject.getJSONObject("simularStation").getDouble("x");
-                            currentStation = new StationInfo(simularStationName, simularLat, simularLong);
-                        }   //포함되지 않는 경우: 인자로 전달한 값이 역과 값이 일치할 경우(-> 거리상 중간지점이 아닌 실제 역 주변의 지하철 역을 리스트로 받기 위한 경우)
+            Response.Listener<String> responseListener = response -> {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);   //(거리상 중간지점 가장 근처의 역 or 중심으로 하고자하는 역)과 그 역 반경 radius(km)이내의 지하철 역 정보들을 받음
+                    if (jsonObject.getBoolean("isDistanceMiddle")) {   //거리상 중간지점인 위치를 전달해 해당 위치와 가장 가까운 지하철역과 그 역 주변 반경 radius내의 지하철역 리스트를 받기 위한 경우
+                        //전달한 위치인 거리상 중간 지점과 가장 가까운 역 정보 저장
+                        String simularStationName = jsonObject.getJSONObject("simularStation").getString("station");
+                        double simularLat = jsonObject.getJSONObject("simularStation").getDouble("y");
+                        double simularLong = jsonObject.getJSONObject("simularStation").getDouble("x");
+                        currentStation = new StationInfo(simularStationName, simularLat, simularLong);
+                    }   //포함되지 않는 경우: 인자로 전달한 값이 역과 값이 일치할 경우(-> 거리상 중간지점이 아닌 실제 역 주변의 지하철 역을 리스트로 받기 위한 경우)
 
-                        //중간 지점과 가장 가까운 근처 반경이내의 역 정보 리스트에 저장
-                        JSONArray nearStationArray = jsonObject.getJSONArray("nearStation");
-                        for (int i=0; i<nearStationArray.length(); i++) {
-                            String nearStationName = nearStationArray.getJSONObject(i).getString("station");
-                            double nearLat = nearStationArray.getJSONObject(i).getDouble("y");
-                            double nearLong = nearStationArray.getJSONObject(i).getDouble("x");
-                            StationInfo nearStation = new StationInfo(nearStationName, nearLat, nearLong);
+                    //중간 지점과 가장 가까운 근처 반경이내의 역 정보 리스트에 저장
+                    JSONArray nearStationArray = jsonObject.getJSONArray("nearStation");
+                    for (int i=0; i<nearStationArray.length(); i++) {
+                        String nearStationName = nearStationArray.getJSONObject(i).getString("station");
+                        double nearLat = nearStationArray.getJSONObject(i).getDouble("y");
+                        double nearLong = nearStationArray.getJSONObject(i).getDouble("x");
+                        StationInfo nearStation = new StationInfo(nearStationName, nearLat, nearLong);
 
-                            if (index == -1)    //거리상 중간 지점에 대한 근처 역 리스트 or minTimeGaps를 기준으로 하는 근처 역 리스트에 추가
-                                nearStationList.add(nearStation);
-                            else    //조사할 대상 리스트(searchTPositions)에 지하철 역이 포함되어 있는 경우
-                                nextSearchList.get(index).add(nearStation);
-                        }
+                        if (index == -1)    //거리상 중간 지점에 대한 근처 역 리스트 or minTimeGaps를 기준으로 하는 근처 역 리스트에 추가
+                            nearStationList.add(nearStation);
+                        else    //조사할 대상 리스트(searchTPositions)에 지하철 역이 포함되어 있는 경우
+                            nextSearchList.get(index).add(nearStation);
+                    }
 
-                        if (jsonObject.getBoolean("isDistanceMiddle"))
-                            getDMiddleTime();   //거리상 중간 지점와 가장 가까운 역과 그 역의 근처 지하철 역들에 대한 소요시간을 구해 최적화된 중간지점을 찾음
-                        else {
-                            if (index == -1)    //searchTPositions 항목의 개수가 0일 때
-                                getNearNeighborTime(false);
-                            else                //searchTPositions 항목의 개수가 0이 아닐 때(위와 다른 수행)
-                                getNearNeighborTime(true);
-                        }
-                    } catch (JSONException e) { e.printStackTrace(); }
-                }
+                    if (jsonObject.getBoolean("isDistanceMiddle"))
+                        getDMiddleTime();   //거리상 중간 지점와 가장 가까운 역과 그 역의 근처 지하철 역들에 대한 소요시간을 구해 최적화된 중간지점을 찾음
+                    else {
+                        //searchTPositions 항목의 개수가 0일 때
+                        //searchTPositions 항목의 개수가 0이 아닐 때(위와 다른 수행)
+                        getNearNeighborTime(index != -1);
+                    }
+                } catch (JSONException e) { e.printStackTrace(); }
             };
             // 서버로 Volley를 이용해서 요청을 함
             GetTMiddleRequest getTMiddleRequest = new GetTMiddleRequest(isDistanceMiddle, String.valueOf(latitude), String.valueOf(longitude), radius, responseListener);    //반경을 radius로(km) 하며 위치를 줌
@@ -398,7 +392,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
         for (StationInfo nearS : nearStationList) {     //거리상 중간지점과 가장 가까운 역을 중심으로 반경 2km이내에 있는 역에 대해
             visitedStations.put(nearS.getStation(), true);     //이 위치를 계산함을 저장
-            CandidateTimePosition tmpStation = new CandidateTimePosition(this, 1, list, nearS.getStation(), nearS.getStationLat(), nearS.getStationLong());
+            new CandidateTimePosition(this, 1, list, nearS.getStation(), nearS.getStationLat(), nearS.getStationLong());
         }
     }
 
@@ -424,10 +418,10 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
                 Collections.sort(searchTPositions);     //searchTPositions의 TimeGap으로 오름차순함(여기서 앞의 3개만 사용함)
 
-                int searchTsize = searchTPositions.size() < 3 ? searchTPositions.size() : 3;
+                int searchTsize = Math.min(searchTPositions.size(), 3);
 
                 for (int i=0; i<searchTsize; i++) {    //조사할 대상 리스트에 포함된 지역을 중심으로 하여 반경 2km이내의 지하철 역을 조사함
-                    nextSearchList.add(new ArrayList<StationInfo>());
+                    nextSearchList.add(new ArrayList<>());
                     current = searchTPositions.get(i);
 
                     try {
@@ -453,7 +447,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 }
                 else {
                     visitedStations.put(nextNearS.getStation(),true);     //이 위치를 계산함을 저장
-                    CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, 2, list, nextNearS.getStation(), nextNearS.getStationLat(), nextNearS.getStationLong());
+                    new CandidateTimePosition(this, 2, list, nextNearS.getStation(), nextNearS.getStationLat(), nextNearS.getStationLong());
                 }
             }
         }
@@ -474,7 +468,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                     }
                     else {
                         visitedStations.put(nextNearS.getStation(),true);     //이 위치를 계산함을 저장
-                        CandidateTimePosition tmpStationIn = new CandidateTimePosition(this, 2, list, nextNearS.getStation(), nextNearS.getStationLat(), nextNearS.getStationLong());
+                        new CandidateTimePosition(this, 2, list, nextNearS.getStation(), nextNearS.getStationLat(), nextNearS.getStationLong());
                     }
                 }
             }
@@ -511,7 +505,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultTPositions.get(0).getResultPositionLat(), resultTPositions.get(0).getResultPositionLong()), 4, false);
 
         //결과 핑 출력
-        int size = resultTPositions.size() < 5 ? resultTPositions.size() : 5;
+        int size = Math.min(resultTPositions.size(), 5);
         for (int i=1; i<size; i++) {
             //거리 기준 중간 지점 역 출력
             MapPOIItem station = new MapPOIItem();
@@ -542,16 +536,18 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     }
 
     //입력한 값들에 대한 거리 기준 중간지점을 위한 작업 수행함
+    @SuppressLint("StaticFieldLeak")
     public class saveHistoryTask extends AsyncTask<String, Void, String> {
-        String standard = "";
+        String standard;
         String resultSName = "";
-        double resultLat = 0.0;
-        double resultLong = 0.0;
+        double resultLat;
+        double resultLong;
         String usersPick = "";
         String resultStations = "";
         String takeTOrD = "";
 
         saveHistoryTask(String standard, double resultLat, double resultLong) {
+            super();
             this.standard = standard;
             this.resultLat = resultLat;
             this.resultLong = resultLong;
@@ -576,7 +572,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 resultStations = resultStations.substring(0, resultStations.length()-1);   //마지막 문자 , 삭제하기
             }
             else {      //시간 기준으로 중간지점 결과를 찾은 경우
-                int size = resultTPositions.size() < 5 ? resultTPositions.size() : 5;
+                int size = Math.min(resultTPositions.size(), 5);
                 if (size > 0) {
                     resultSName = resultTPositions.get(0).getStationName();
 
@@ -597,16 +593,13 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         @Override
         protected String doInBackground(String... strings) {
             //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
-            Response.Listener<String> responseListener = new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);   //전달한 위치 근처의 5개 지하철 역 정보(이름, 경도, 위도)를 받음
-                    } catch (JSONException e) { e.printStackTrace(); }
-                }
+            Response.Listener<String> responseListener = response -> {
+                try {
+                    new JSONObject(response);   //저장됨 완료
+                } catch (JSONException e) { e.printStackTrace(); }
             };
 
-            // 서버로 Volley를 이용해서 요청을 함
+            //서버로 Volley를 이용해서 요청을 함
             SaveHistoryRequest sHistoryRequest = new SaveHistoryRequest(selectedGroup.getGroupName(), selectedGroup.getGHostName(),
                     standard, resultSName, resultLat, resultLong, usersPick, resultStations, takeTOrD, responseListener);    //반경을 radius로(km) 하며 위치를 줌
             RequestQueue queueSave = Volley.newRequestQueue(ShowMiddleActivity.this);

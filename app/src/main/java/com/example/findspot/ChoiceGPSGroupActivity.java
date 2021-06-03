@@ -1,5 +1,6 @@
 package com.example.findspot;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,14 +23,14 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 
 import static com.example.findspot.SelectWhomActivity.ghistory;
 import static com.example.findspot.SelectWhomActivity.list_g_users;
@@ -50,8 +51,8 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
 
         String getExtraH = getIntent().getStringExtra("history");
 
-        position_tmp = new ArrayList<PositionItemInfo>();
-        list_group = new ArrayList<PositionItemInfo>();         //TODO: ShowMiddleActivity에서 뒤로가기를 할 때 clear해줘야 함
+        position_tmp = new ArrayList<>();
+        list_group = new ArrayList<>();         //TODO: ShowMiddleActivity에서 뒤로가기를 할 때 clear해줘야 함
         for (PositionItemInfo pi : list_g_users) {
             list_group.add(new PositionItemInfo(pi.getUserName(), "", 0.0, 0.0));
         }
@@ -62,10 +63,10 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         lv.setAdapter(listAdapter);
 
         tv_applyhistory = findViewById(R.id.choice_gps_g_applyhistory);     //최근 기록을 볼 수 있는 지 tv 보여줌
-            if (getExtraH.equals("noHistory"))
-                tv_applyhistory.setVisibility(View.INVISIBLE);
-            else
-                tv_applyhistory.setText(getExtraH);     //최근 기록 확인 [시간/거리 기준]  >>
+        if (getExtraH.equals("noHistory"))
+            tv_applyhistory.setVisibility(View.INVISIBLE);
+        else
+            tv_applyhistory.setText(getExtraH);     //최근 기록 확인 [시간/거리 기준]  >>
         btn_search_time = (Button) findViewById(R.id.choice_gps_g_bt_time);
         btn_search_distance = (Button) findViewById(R.id.choice_gps_g_bt_distance);
 
@@ -74,64 +75,55 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
     }
 
     void choice_tv_clickListener() {
-        tv_applyhistory.setOnClickListener(new View.OnClickListener() {     //"최근에 [시간/거리] 찾은 위치 보기" 텍스트 클릭 시
-            @Override
-            public void onClick(View v) {
-                //위치 기록으로 중간지점 찾기가 보이도록 함
-                if (ghistory.getStandard().equals("T")) {  //최근에 이 그룹으로 시간 기준 중간지점을 찾은 적이 있음
-                    //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
-                    Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                    it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
-                    it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
-                    it_showmiddle.putExtra("isHistory", "true");       //이전 history 결과를 보여줘야 함
-                    startActivity(it_showmiddle);
-                }
-                else {  //최근에 이 그룹으로 거리 기준 중간지점을 찾은 적이 있음(D)
-                    //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
-                    Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                    it_showmiddle.putExtra("activity_tag", "group");    //어떤 Activity인지(random / group)
-                    it_showmiddle.putExtra("standard_tag", "distance"); //거리 기준
-                    it_showmiddle.putExtra("isHistory", "true");        //이전 history 결과를 보여줘야 함
-                    startActivity(it_showmiddle);
-                }
+        tv_applyhistory.setOnClickListener(v -> {       //"최근에 [시간/거리] 찾은 위치 보기" 텍스트 클릭 시
+            //위치 기록으로 중간지점 찾기가 보이도록 함
+            if (ghistory.getStandard().equals("T")) {  //최근에 이 그룹으로 시간 기준 중간지점을 찾은 적이 있음
+                //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
+                Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
+                it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
+                it_showmiddle.putExtra("isHistory", "true");       //이전 history 결과를 보여줘야 함
+                startActivity(it_showmiddle);
+            }
+            else {  //최근에 이 그룹으로 거리 기준 중간지점을 찾은 적이 있음(D)
+                //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
+                Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
+                it_showmiddle.putExtra("activity_tag", "group");    //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("standard_tag", "distance"); //거리 기준
+                it_showmiddle.putExtra("isHistory", "true");        //이전 history 결과를 보여줘야 함
+                startActivity(it_showmiddle);
             }
         });
     }
 
     void choice_btn_clickListener() {
-        btn_search_time.setOnClickListener(new View.OnClickListener() { //"시간 기준" 버튼 클릭시,
-            @Override
-            public void onClick(View v) {
-                boolean isNext = true;
-                for (PositionItemInfo pi : list_group) {
-                    if (pi.getRoadName().equals("")) {      //입력한 도로명이 없을 시
-                        isNext = false;
-                        Toast.makeText(getApplicationContext(), "입력하지 않은 위치가 있습니다.", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
+        btn_search_time.setOnClickListener(v -> {   //"시간 기준" 버튼 클릭시,
+            boolean isNext = true;
+            for (PositionItemInfo pi : list_group) {
+                if (pi.getRoadName().equals("")) {      //입력한 도로명이 없을 시
+                    isNext = false;
+                    Toast.makeText(getApplicationContext(), "입력하지 않은 위치가 있습니다.", Toast.LENGTH_SHORT).show();
+                    break;
                 }
+            }
 
-                if (isNext) {       //다음 화면으로 넘어갈 수 있음
-                    //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
-                    Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                    it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
-                    it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
-                    it_showmiddle.putExtra("isHistory", "false");      //history 결과 보여주는 것이 아님
-                    startActivity(it_showmiddle);
-                }
+            if (isNext) {       //다음 화면으로 넘어갈 수 있음
+                //activity_showmiddle로 화면 이동하고 시간 기준임을 intent로 전달
+                Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
+                it_showmiddle.putExtra("standard_tag", "time");    //시간 기준
+                it_showmiddle.putExtra("activity_tag", "group");   //어떤 Activity인지(random / group)
+                it_showmiddle.putExtra("isHistory", "false");      //history 결과 보여주는 것이 아님
+                startActivity(it_showmiddle);
             }
         });
 
-        btn_search_distance.setOnClickListener(new View.OnClickListener() { //"거리 기준" 버튼 클릭시,
-            @Override
-            public void onClick(View v) {
-                //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
-                Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
-                it_showmiddle.putExtra("standard_tag", "distance");     //거리 기준
-                it_showmiddle.putExtra("activity_tag", "group");        //어떤 Activity인지(random / group)
-                it_showmiddle.putExtra("isHistory", "false");           //history 결과 보여주는 것이 아님
-                startActivity(it_showmiddle);
-            }
+        btn_search_distance.setOnClickListener(v -> {   //"거리 기준" 버튼 클릭시,
+            //activity_showmiddle로 화면 이동하고 거리 기준임을 intent로 전달
+            Intent it_showmiddle = new Intent(ChoiceGPSGroupActivity.this, ShowMiddleActivity.class);
+            it_showmiddle.putExtra("standard_tag", "distance");     //거리 기준
+            it_showmiddle.putExtra("activity_tag", "group");        //어떤 Activity인지(random / group)
+            it_showmiddle.putExtra("isHistory", "false");           //history 결과 보여주는 것이 아님
+            startActivity(it_showmiddle);
         });
     }
 
@@ -162,24 +154,22 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
     }
 
     //KaKao Geocode API 통해 주소 검색 결과 받기
+    @SuppressLint("StaticFieldLeak")
     public class Task extends AsyncTask<String, Void, String> {
         String receiveMsg = "";
-
         String KAKAO_KEY = getString(R.string.kakao_key);  //KAKAO REST API 키
         String auth = "KakaoAK " + KAKAO_KEY;
         URL link = null;
         HttpsURLConnection hc = null;
+
+        Task() { super(); }
 
         @Override
         protected String doInBackground(String... params) {
             try {
                 link = new URL("https://dapi.kakao.com/v2/local/search/address.json?query=" + URLEncoder.encode(position_tmp.get(0).getRoadName(), "UTF-8")); //한글을 URL용으로 인코딩
 
-                HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                    public boolean verify(String arg0, SSLSession arg1) {
-                        return true;
-                    }
-                });
+                HttpsURLConnection.setDefaultHostnameVerifier((arg0, arg1) -> true);
 
                 hc = (HttpsURLConnection) link.openConnection();
                 hc.setRequestMethod("GET");
@@ -188,10 +178,10 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 hc.setRequestProperty("Authorization", auth);
 
                 //String 형태로 결과 받기
-                if (hc.getResponseCode() == hc.HTTP_OK) {
-                    InputStreamReader tmp = new InputStreamReader(hc.getInputStream(), "UTF-8");
+                if (hc.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    InputStreamReader tmp = new InputStreamReader(hc.getInputStream(), StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(tmp);
-                    StringBuffer buffer = new StringBuffer();
+                    StringBuilder buffer = new StringBuilder();
                     String str;
                     while ((str = reader.readLine()) != null) {
                         buffer.append(str);
@@ -203,9 +193,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 } else {
                     Log.i("통신 결과", hc.getResponseCode() + "에러");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) { e.printStackTrace(); }
 
             return receiveMsg;
         }
