@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|center_vertical"
         android:layout_marginTop="15dp"
-        android:text="앱 이름"
+        android:text="@string/called_app_name"
         android:textStyle="bold"
         android:textColor="#000000"
         android:textSize="25sp"
@@ -24,14 +24,15 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/user"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0"
-        app:layout_constraintHorizontal_bias="1"/>
+        app:layout_constraintHorizontal_bias="1"
+        android:contentDescription="@string/home_mypage_description" />
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -62,14 +63,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:text=" 중간지점 찾기 "
+            android:text="@string/home_showmiddle_btn"
             android:textColor="#000000"
             android:textSize="40sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:text="(시간/거리상)"
+            android:text="@string/home_showmiddle_standard"
             android:textColor="#000000"
             android:textSize="30sp" />
     </LinearLayout>
@@ -82,7 +83,9 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/copyright"
-        app:layout_constraintVertical_bias="0.72">
+        app:layout_constraintVertical_bias="0.72"
+        android:baselineAligned="false">
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -94,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:padding="5dp"
-                android:text="친구\n (추가, 삭제) "
+                android:text="@string/home_friend_btn"
                 android:textColor="#000000"
                 android:textSize="23sp"
                 android:background="#EDFFE7"/>
@@ -111,7 +114,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:padding="5dp"
-                android:text="그룹\n (추가, 삭제) "
+                android:text="@string/home_group_btn"
                 android:textColor="#000000"
                 android:textSize="23sp"
                 android:background="#EDFFE7"/>
@@ -126,5 +129,5 @@
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Copyright, 소은영은, All rights reserved " />
+        android:text="@string/copyright" />
 </androidx.constraintlayout.widget.ConstraintLayout>

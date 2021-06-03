@@ -45,19 +45,21 @@ import static com.example.findspot.SelectWhomActivity.selectedGroup;
 import static com.example.findspot.algorithm.MiddleDPointAlgorithm.calDistance;
 
 public class ShowMiddleActivity extends AppCompatActivity implements MapView.POIItemEventListener {
-    MapView mapView;
-    ArrayList<PositionItemInfo> list;   //실제 중간지점을 찾을 사람들의 설정 위치 등의 정보
-    StationInfo currentStation;     //거리상 중간지점과 가장 가까운 지하철역 정보(고정됨)
-    ArrayList<StationInfo> nearStationList;     //현재 기준이 되는 지하철역의 반경 _km 내에 있는 지하철역 리스트(가변적) cf. 거리기준일 때는 결과 주변 지하철 역 리스트들
-    ArrayList <ResultDistancePosition> resultDPositions;
-    ArrayList<ArrayList<StationInfo>> nextSearchList;     //거리상 중간 지점 이후 그 근처의 지하철 역을 기준으로 하는 그 근처의 리스트들 목록
-    HashMap<String, Boolean> visitedStations;   //지하철 역 중복 계산 방지
     static int countFinishLoop = 0;
     static CandidateTimePosition current;
     static CandidateTimePosition minTimeGapS;
     static ArrayList<CandidateTimePosition> resultTPositions;  //소요시간 최대 및 최소 오차가 10 이하인 역들
     static ArrayList<CandidateTimePosition> searchTPositions;  //(더 조사해야하는 역들)
 
+    boolean isChangedHistory = false;
+    ArrayList<PositionItemInfo> list;   //실제 중간지점을 찾을 사람들의 설정 위치 등의 정보
+    StationInfo currentStation;     //거리상 중간지점과 가장 가까운 지하철역 정보(고정됨)
+    ArrayList<StationInfo> nearStationList;     //현재 기준이 되는 지하철역의 반경 _km 내에 있는 지하철역 리스트(가변적) cf. 거리기준일 때는 결과 주변 지하철 역 리스트들
+    ArrayList <ResultDistancePosition> resultDPositions;
+    ArrayList<ArrayList<StationInfo>> nextSearchList;     //거리상 중간 지점 이후 그 근처의 지하철 역을 기준으로 하는 그 근처의 리스트들 목록
+    HashMap<String, Boolean> visitedStations;   //지하철 역 중복 계산 방지
+
+    MapView mapView;
     ViewPager pager;
     PositionPagerAdapter adapter;
     CircleIndicator indicator;
@@ -244,8 +246,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     @SuppressLint("StaticFieldLeak")
     public class GetDStationTask extends AsyncTask<String, Void, String> {
         ResultDistancePosition middleDistancePosition;
-        double latitude;
-        double longitude;
+        double latitude, longitude;
 
         GetDStationTask(ResultDistancePosition middleDistancePosition, double latitude, double longitude) {
             super();
@@ -313,8 +314,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     public class GetTStationTask extends AsyncTask<String, Void, String> {
         boolean isDistanceMiddle;
         int index = -1;
-        double latitude;
-        double longitude;
+        double latitude, longitude;
         int radius;
 
         GetTStationTask(boolean isDistanceMiddle, double latitude, double longitude, int radius) {
@@ -540,8 +540,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     public class saveHistoryTask extends AsyncTask<String, Void, String> {
         String standard;
         String resultSName = "";
-        double resultLat;
-        double resultLong;
+        double resultLat, resultLong;
         String usersPick = "";
         String resultStations = "";
         String takeTOrD = "";
@@ -594,14 +593,12 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         protected String doInBackground(String... strings) {
             //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
             Response.Listener<String> responseListener = response -> {
-                try {
-                    new JSONObject(response);   //저장됨 완료
-                } catch (JSONException e) { e.printStackTrace(); }
+                //TODO: history 기록 변경
             };
 
             //서버로 Volley를 이용해서 요청을 함
             SaveHistoryRequest sHistoryRequest = new SaveHistoryRequest(selectedGroup.getGroupName(), selectedGroup.getGHostName(),
-                    standard, resultSName, resultLat, resultLong, usersPick, resultStations, takeTOrD, responseListener);    //반경을 radius로(km) 하며 위치를 줌
+                    standard, resultSName, resultLat, resultLong, usersPick, resultStations, takeTOrD, responseListener);
             RequestQueue queueSave = Volley.newRequestQueue(ShowMiddleActivity.this);
             queueSave.add(sHistoryRequest);
 

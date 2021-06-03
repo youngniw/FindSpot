@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,8 +35,13 @@ public class GroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
 
+        TextView tvNoGroup = findViewById(R.id.group_tvNoGroup);
+            if (groupList.size() == 0)
+                tvNoGroup.setVisibility(View.VISIBLE);
+            else
+                tvNoGroup.setVisibility(View.GONE);
         final SwipeMenuListView listview = findViewById(R.id.group_swipeMenuLv);    //스와이프 메뉴 가능한 리스트뷰 생성
-        adapter = new GroupListAdapter(GroupActivity.this, R.layout.grouprow, groupList);
+        adapter = new GroupListAdapter(GroupActivity.this, R.layout.grouprow, groupList, tvNoGroup);
         listview.setAdapter(adapter);       //어댑터 연결
         listview.setMenuCreator(creator);   //스와이프시 나올 메뉴 연결
         listview.setOnSwipeListener(new SwipeMenuListView.OnSwipeListener() {
@@ -62,11 +68,10 @@ public class GroupActivity extends AppCompatActivity {
     View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //TODO: 다이얼로그로 친구 선택 리스트 보여주고 친구 선택하고 완료 버튼 누르면 그룹명 입력받고 서버에게 요청
             AddGroupDialog addGroupDialog = new AddGroupDialog(GroupActivity.this, group -> {
                 groupList.add(group);
                 adapter.notifyDataSetChanged();
-            }, nickName, friendList);
+            }, nickName, friendList, groupList);
             addGroupDialog.show();
         }
     };

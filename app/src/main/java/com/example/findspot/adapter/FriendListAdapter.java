@@ -15,11 +15,13 @@ public class FriendListAdapter extends BaseAdapter {        //friendlist와 연�
     LayoutInflater inflater;
     int layout;
     ArrayList<String> src;
+    TextView tvNoFriend;
 
-    public FriendListAdapter(Context context, int layout, ArrayList<String> src) {
+    public FriendListAdapter(Context context, int layout, ArrayList<String> src, TextView tvNoFriend) {
         this.layout = layout;
         this.src = src;
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.tvNoFriend = tvNoFriend;
     }
 
     @Override
@@ -41,5 +43,15 @@ public class FriendListAdapter extends BaseAdapter {        //friendlist와 연�
         tv_groupName.setText(src.get(pos));
 
         return convertView;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+
+        if (getCount() == 0)
+            tvNoFriend.setVisibility(View.VISIBLE);
+        else
+            tvNoFriend.setVisibility(View.GONE);
     }
 }

@@ -17,7 +17,10 @@
 
         <!-- Customize your theme here. -->
         <!--폰트 적용-->
-        <item name="android:textViewStyle">@style/customTextViewFontStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <!--AppCompat에서는 android:접두사 제거-->
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="editTextStyle">@style/EditTextStyle</item>
     </style>
     <!--Button Style1(버튼 배경색: white)-->
     <style name="ButtonStyle1" parent="Widget.AppCompat.Button.Colored">

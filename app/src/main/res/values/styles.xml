@@ -7,7 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <!--폰트를 적용-->
-        <item name="android:textViewStyle">@style/customTextViewFontStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="android:buttonStyle">@style/ButtonStyle</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
 
         <!-- 타이틀바 없애기 -->
         <item name="windowActionBar">false</item>

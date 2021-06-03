@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/full_border"
@@ -10,7 +11,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="🌱회원가입🌱"
+        android:text="@string/join_title"
         android:textColor="#000000"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -46,33 +47,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="ID: " />
+                android:text="@string/join_id" />
 
             <EditText
                 android:id="@+id/join_id"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:singleLine="true"
-                android:hint="E-mail 주소 형식"
-                android:textSize="16sp"
-                android:textColor="#000000" />
+                android:hint="@string/join_email_hint"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                tools:ignore="NestedWeights"
+                android:autofillHints="AUTOFILL_HINT_EMAIL_ADDRESS"
+                android:inputType="textEmailAddress" />
 
             <Button
                 android:id="@+id/join_id_check"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="중복확인" />
+                android:text="@string/join_duplicate_btn" />
         </LinearLayout>
         <TextView
             android:id="@+id/join_isCheckedID"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="-5dp"
-            android:layout_marginLeft="25dp"
+            android:layout_marginStart="25dp"
             android:textColor="#398E3D"
             android:textSize="11sp"
-            android:text="사용가능한 ID입니다."/>
+            android:text="@string/join_available_id"
+            tools:ignore="SmallSp" />
 
         <LinearLayout
             android:tag="_password"
@@ -86,18 +91,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="Password: " />
+                android:text="@string/join_password" />
 
             <EditText
                 android:id="@+id/join_passwd"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:inputType="textPassword"
                 android:singleLine="true"
-                android:hint="8~16자의 문자, 숫자"
-                android:textSize="16sp"
-                android:textColor="#000000"/>
+                android:hint="@string/join_password_hint"
+                android:textSize="14sp"
+                android:textColor="#000000"
+                tools:ignore="NestedWeights"
+                android:autofillHints="AUTOFILL_HINT_PASSWORD" />
         </LinearLayout>
 
         <LinearLayout
@@ -112,7 +119,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="성별: " />
+                android:text="@string/join_gender" />
 
             <Switch
                 android:id="@+id/join_gender"
@@ -122,8 +129,8 @@
                 android:thumbTint="#8FFF86"
                 android:trackTint="#98F791"
                 android:showText="true"
-                android:textOff="남자"
-                android:textOn="여자"/>
+                android:textOff="@string/join_switch_m"
+                android:textOn="@string/join_switch_w"/>
         </LinearLayout>
 
         <LinearLayout
@@ -138,17 +145,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="태어난 연도: " />
+                android:text="@string/join_birthYear" />
 
             <EditText
                 android:id="@+id/join_birthYear"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:focusable="false"
                 android:textAlignment="center"
                 android:textSize="16sp"
-                android:textColor="#000000"/>
+                android:textColor="#000000"
+                tools:ignore="LabelFor,NestedWeights"
+                android:inputType="number"
+                android:importantForAutofill="no" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1"/> <!--내용없는 공간차지-->
         </LinearLayout>
@@ -166,14 +176,16 @@
                 android:id="@+id/join_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:text="확인" />
+                android:layout_marginEnd="10dp"
+                android:text="@string/join_ok"
+                style="?android:attr/buttonBarButtonStyle" />
 
             <Button
                 android:id="@+id/join_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="취소" />
+                android:text="@string/join_cancel"
+                style="?android:attr/buttonBarButtonStyle" />
         </LinearLayout>
     </LinearLayout>
 
@@ -185,5 +197,5 @@
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Copyright, 소은영은, All rights reserved " />
+        android:text="@string/copyright" />
 </androidx.constraintlayout.widget.ConstraintLayout>

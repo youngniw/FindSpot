@@ -18,11 +18,13 @@ public class GroupListAdapter extends BaseAdapter {
     LayoutInflater inflater;
     int layout;
     ArrayList<GroupInfo> src;
+    TextView tvNoGroup;
 
-    public GroupListAdapter(Context context, int layout, ArrayList<GroupInfo> src) {
+    public GroupListAdapter(Context context, int layout, ArrayList<GroupInfo> src, TextView tvNoGroup) {
         this.layout = layout;
         this.src = src;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.tvNoGroup = tvNoGroup;
     }
 
     @Override
@@ -48,5 +50,15 @@ public class GroupListAdapter extends BaseAdapter {
         tv_groupUsers.setText(String.join(", ", groupList.get(pos).getGroupUsers()));
 
         return convertView;
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+
+        if (getCount() == 0)
+            tvNoGroup.setVisibility(View.VISIBLE);
+        else
+            tvNoGroup.setVisibility(View.GONE);
     }
 }

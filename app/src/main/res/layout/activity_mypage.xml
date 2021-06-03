@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="My Page"
+        android:text="@string/mypage_title"
         android:textStyle="bold"
         android:textColor="#000000"
         android:textSize="25sp"
@@ -58,6 +58,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/mypage_nickname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="생귤탱귤"
@@ -65,6 +66,7 @@
                 android:textSize="18sp"/>
 
             <TextView
+                android:id="@+id/mypage_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="abc1234@naver.com"/>
@@ -187,7 +189,7 @@
         android:id="@+id/copyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Copyright, 소은영은, All rights reserved "
+        android:text="@string/copyright"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

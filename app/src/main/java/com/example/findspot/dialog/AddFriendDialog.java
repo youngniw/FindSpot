@@ -88,7 +88,7 @@ public class AddFriendDialog extends Dialog {
                         boolean canAddFriend = jsonObject.getBoolean("canAdd");
                         if (canAddFriend) {
                             addFriendDialogListener.clickCompleteBt(friendNick);
-                            dismiss();      //TODO: 안됨!!
+                            dismiss();
                         } else {
                             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             params.addRule(RelativeLayout.BELOW, R.id.fDialog_etByUser);

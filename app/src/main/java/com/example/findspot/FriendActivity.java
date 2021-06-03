@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,8 +35,13 @@ public class FriendActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend);
 
+        TextView tvNoFriend = findViewById(R.id.friend_tvNoFriend);
+            if (friendList.size() == 0)
+                tvNoFriend.setVisibility(View.VISIBLE);
+            else
+                tvNoFriend.setVisibility(View.GONE);
         final SwipeMenuListView listview = findViewById(R.id.friend_swipeMenuLv);
-        adapter = new FriendListAdapter(FriendActivity.this, R.layout.friendrow, friendList);
+        adapter = new FriendListAdapter(FriendActivity.this, R.layout.friendrow, friendList, tvNoFriend);
         listview.setAdapter(adapter);       //어댑터 연결
         listview.setMenuCreator(creator);   //스와이프시 나올 메뉴 연결
         listview.setOnSwipeListener(new SwipeMenuListView.OnSwipeListener() {

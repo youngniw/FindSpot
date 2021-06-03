@@ -123,7 +123,7 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
             it_showmiddle.putExtra("standard_tag", "distance");     //거리 기준
             it_showmiddle.putExtra("activity_tag", "group");        //어떤 Activity인지(random / group)
             it_showmiddle.putExtra("isHistory", "false");           //history 결과 보여주는 것이 아님
-            startActivity(it_showmiddle);
+            startActivityForResult(it_showmiddle, 300);
         });
     }
 
@@ -133,11 +133,9 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
             String resultText = "값이없음";
             try {
                 resultText = new ChoiceGPSGroupActivity.Task().execute().get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            String[] resultXY = geojsonParser(resultText);  //JSON 형식에서 x,y값 추출하기
+            } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
+            String[] resultXY = geojsonParser(resultText);  //JSON 형식에서 x,y값 추출하기
             position_tmp.get(0).setLongitude(Double.parseDouble(resultXY[0]));
             position_tmp.get(0).setLatitude(Double.parseDouble(resultXY[1]));
 
@@ -148,8 +146,8 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
                 }
             }
 
-            position_tmp.remove(0); //0번째 아이템 삭제
-            listAdapter.notifyDataSetChanged();     //리스트 갱신
+            position_tmp.remove(0);             //0번째 아이템 삭제
+            listAdapter.notifyDataSetChanged();       //리스트 갱신
         }
     }
 
