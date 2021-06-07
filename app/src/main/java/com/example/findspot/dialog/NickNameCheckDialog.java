@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -42,6 +43,7 @@ public class NickNameCheckDialog extends Dialog {
         et_dialogNickName = findViewById(R.id.nickNameDialog_nickname);
         btn_dialogComplete = findViewById(R.id.nickNameDialog_complete);
         tv_dialogIsCheckedNickName = findViewById(R.id.nickNameDialog_isCheckedNickName);
+            tv_dialogIsCheckedNickName.setVisibility(View.GONE);
 
         //값이 변경될 때,
         et_dialogNickName.addTextChangedListener(new TextWatcher() {
@@ -50,7 +52,7 @@ public class NickNameCheckDialog extends Dialog {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count == 1) //닉네임 중복 경고 지움
-                    tv_dialogIsCheckedNickName.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 0));
+                    tv_dialogIsCheckedNickName.setVisibility(View.GONE);
             }
             @Override
             public void afterTextChanged(Editable s) { }
@@ -60,30 +62,35 @@ public class NickNameCheckDialog extends Dialog {
         btn_dialogComplete.setOnClickListener(v -> {
             userNickName = et_dialogNickName.getText().toString();
 
-            Response.Listener<String> responseListener = response -> {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    boolean existNickName = jsonObject.getBoolean("existNickName");
-                    if (existNickName) {    //이미 닉네임이 존재함
-                        //닉네임 중복 경고 보이게끔.
-                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        params.addRule(RelativeLayout.BELOW, R.id.nickNameDialog_nickname);
-                        params.setMargins(40, 8, 40, 0);
-                        tv_dialogIsCheckedNickName.setLayoutParams(params);
-                    } else {                //닉네임 사용가능
-                        //context한테 닉네임 전달하고 거기서 DB Insert 해야함
-                        nickNameCheckDialogListener.clickBtn(userNickName);     //JoinActivity에서 처리할 수 있도록.
-                        dismiss();
-                    }
+            if (userNickName.length() == 0) {
+                tv_dialogIsCheckedNickName.setVisibility(View.VISIBLE);
+                tv_dialogIsCheckedNickName.setText("* 입력하신 닉네임이 없습니다.");
+            }
 
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            };
-            // 서버로 Volley를 이용해서 요청을 함.
-            NickNameCheckRequest nickNameCheckRequest = new NickNameCheckRequest(userNickName, responseListener);
-            RequestQueue queue = Volley.newRequestQueue(getContext());
-            queue.add(nickNameCheckRequest);
+            else {
+                Response.Listener<String> responseListener = response -> {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        boolean existNickName = jsonObject.getBoolean("existNickName");
+                        if (existNickName) {    //이미 닉네임이 존재함
+                            //닉네임 중복 경고 보이게끔.
+                            tv_dialogIsCheckedNickName.setVisibility(View.VISIBLE);
+                            tv_dialogIsCheckedNickName.setText("* 이미 중복된 닉네임이 있습니다.");
+                        } else {                //닉네임 사용가능
+                            //context한테 닉네임 전달하고 거기서 DB Insert 해야함
+                            nickNameCheckDialogListener.clickBtn(userNickName);     //JoinActivity에서 처리할 수 있도록.
+                            dismiss();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                };
+                // 서버로 Volley를 이용해서 요청을 함.
+                NickNameCheckRequest nickNameCheckRequest = new NickNameCheckRequest(userNickName, responseListener);
+                RequestQueue queue = Volley.newRequestQueue(getContext());
+                queue.add(nickNameCheckRequest);
+            }
         });
     }
 

@@ -14,8 +14,8 @@ public class JoinRequest extends StringRequest {
         super(Method.POST, URL, listener, null);
 
         userInfo = new HashMap<>();
-        userInfo.put("ID", userID);
-        userInfo.put("PW", userPW);
+        userInfo.put("ID", userID);     //소셜 로그인에서는 회원 구글 고유 번호임
+        userInfo.put("PW", userPW);     //소셜 로그인에서 Email 계정임
         userInfo.put("nickName", userNickName);
         userInfo.put("gender", gender);
         userInfo.put("birthYear", birthYear);

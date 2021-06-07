@@ -5,6 +5,7 @@
 
     <string name="kakao_key">dc90ecf7e13bbcfd5d02a7a41ed33464</string>
     <string name="odsay_key">Fmml9S/S9aj/SPIDlu1uHf6qGftg2yAeTQEon7+Vfds</string>
+    <string name="server_client_id">275804872784-o7vpknep10pgbkbbeegu884mgh99mgem.apps.googleusercontent.com</string>
 
     <string name="choice_gps_title">위치 선택하기</string>
     <string name="choice_gps_history"><![CDATA[최근에 [시간/거리] 찾은 위치 보기 >>]]></string>

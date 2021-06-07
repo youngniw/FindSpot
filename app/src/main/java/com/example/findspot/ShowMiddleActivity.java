@@ -1,10 +1,10 @@
 package com.example.findspot;
 
 import android.annotation.SuppressLint;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
@@ -19,6 +19,7 @@ import com.example.findspot.algorithm.MiddleDPointAlgorithm;
 import com.example.findspot.data.PositionItemInfo;
 import com.example.findspot.data.RouteInfo;
 import com.example.findspot.data.StationInfo;
+import com.example.findspot.dialog.ProgressDialog;
 import com.example.findspot.request.GetDMiddleRequest;
 import com.example.findspot.request.GetTMiddleRequest;
 import com.example.findspot.request.SaveHistoryRequest;
@@ -45,24 +46,24 @@ import static com.example.findspot.SelectWhomActivity.selectedGroup;
 import static com.example.findspot.algorithm.MiddleDPointAlgorithm.calDistance;
 
 public class ShowMiddleActivity extends AppCompatActivity implements MapView.POIItemEventListener {
-    static int countFinishLoop = 0;
-    static CandidateTimePosition current;
-    static CandidateTimePosition minTimeGapS;
-    static ArrayList<CandidateTimePosition> resultTPositions;  //소요시간 최대 및 최소 오차가 10 이하인 역들
-    static ArrayList<CandidateTimePosition> searchTPositions;  //(더 조사해야하는 역들)
-
-    boolean isChangedHistory = false;
+    MapView mapView;
     ArrayList<PositionItemInfo> list;   //실제 중간지점을 찾을 사람들의 설정 위치 등의 정보
     StationInfo currentStation;     //거리상 중간지점과 가장 가까운 지하철역 정보(고정됨)
     ArrayList<StationInfo> nearStationList;     //현재 기준이 되는 지하철역의 반경 _km 내에 있는 지하철역 리스트(가변적) cf. 거리기준일 때는 결과 주변 지하철 역 리스트들
     ArrayList <ResultDistancePosition> resultDPositions;
     ArrayList<ArrayList<StationInfo>> nextSearchList;     //거리상 중간 지점 이후 그 근처의 지하철 역을 기준으로 하는 그 근처의 리스트들 목록
     HashMap<String, Boolean> visitedStations;   //지하철 역 중복 계산 방지
+    static int countFinishLoop = 0;
+    static CandidateTimePosition current;
+    static CandidateTimePosition minTimeGapS;
+    static ArrayList<CandidateTimePosition> resultTPositions;  //소요시간 최대 및 최소 오차가 10 이하인 역들
+    static ArrayList<CandidateTimePosition> searchTPositions;  //(더 조사해야하는 역들)
 
-    MapView mapView;
     ViewPager pager;
     PositionPagerAdapter adapter;
     CircleIndicator indicator;
+
+    ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,6 +94,12 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
         pager = (ViewPager)findViewById(R.id.showmiddle_viewPager);
         indicator = (CircleIndicator) findViewById(R.id.indicator);
+
+        //로딩창 객체
+        progressDialog = new ProgressDialog(this);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));    //로딩창을 투명하게
+        //progressDialog.setCancelable(false);    //로딩창 주변을 클릭해도 다이얼로그가 사라지지 않도록 설정
+
 
         //전체 사용자 ping으로 나타내기
         for (int i = 0; i < list.size(); i++) {
@@ -208,6 +215,7 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                 }
             }
             else {  //기록을 보여주는 것이 아닌 실제로 알고리즘 수행해야함
+                progressDialog.show();  //시간기준 중간찾기이며, history를 보여주는것이 아닐 때 로딩창 띄우기
                 visitedStations = new HashMap<>();              //지하철역에 대해 timeGap계산을 했는 지를 저장함
                 minTimeGapS = new CandidateTimePosition();      //이후에 주변역들 중 소요시간 최소인 곳을 저장함
 
@@ -246,7 +254,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     @SuppressLint("StaticFieldLeak")
     public class GetDStationTask extends AsyncTask<String, Void, String> {
         ResultDistancePosition middleDistancePosition;
-        double latitude, longitude;
+        double latitude;
+        double longitude;
 
         GetDStationTask(ResultDistancePosition middleDistancePosition, double latitude, double longitude) {
             super();
@@ -314,7 +323,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     public class GetTStationTask extends AsyncTask<String, Void, String> {
         boolean isDistanceMiddle;
         int index = -1;
-        double latitude, longitude;
+        double latitude;
+        double longitude;
         int radius;
 
         GetTStationTask(boolean isDistanceMiddle, double latitude, double longitude, int radius) {
@@ -521,6 +531,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         indicator.setViewPager(pager);
         adapter.registerDataSetObserver(indicator.getDataSetObserver());
 
+        progressDialog.dismiss();   //로딩중이라는 다이얼로그 없앰
+
         adapter.notifyDataSetChanged();
 
         //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
@@ -540,7 +552,8 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     public class saveHistoryTask extends AsyncTask<String, Void, String> {
         String standard;
         String resultSName = "";
-        double resultLat, resultLong;
+        double resultLat;
+        double resultLong;
         String usersPick = "";
         String resultStations = "";
         String takeTOrD = "";
@@ -593,7 +606,9 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         protected String doInBackground(String... strings) {
             //데이터베이스로부터 주어진 x와 y값을 위치를 중심으로 가장 가까운 역을 받고, 또한 그 가까운 역을 중심으로 반경 2km이내의 역에 대한 정보를 반환받음
             Response.Listener<String> responseListener = response -> {
-                //TODO: history 기록 변경
+                try {
+                    new JSONObject(response);   //저장됨 완료
+                } catch (JSONException e) { e.printStackTrace(); }
             };
 
             //서버로 Volley를 이용해서 요청을 함

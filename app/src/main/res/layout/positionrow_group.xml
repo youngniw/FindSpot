@@ -37,7 +37,8 @@
         android:id="@+id/positionrow_g_et_inputPosition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
         android:focusable="false"
+        android:textSize="15sp"
+        android:textColor="@color/black"
         android:scrollHorizontally="false"/>
 </LinearLayout>

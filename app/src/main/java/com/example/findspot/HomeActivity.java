@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity {
     public static ArrayList<GroupInfo> groupList;
-    static ArrayList<String> friendList;
+    public static ArrayList<String> friendList;
 
     LinearLayout linear_home_findspot;
     ImageButton imgbtn_home_user;
