@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,8 +69,14 @@ public class SelectWhomActivity extends AppCompatActivity {
 
         selectedGroup = new GroupInfo("tmp", "tmp");    //임시로 설정(선택된 그룹 정보 저장)
 
+        selwhom_iv_clickListener();
         selwhom_radiogroup_checkedChangeListener(); //SelectWhom 화면에서 라디오그룹에 대한 setOnCheckedChangeListener를 정의한 함수를 호출함
         selwhom_btn_clickListener();         //SelectWhom 화면에서 "위치 선택하기"버튼에 대한 onClickListener를 정의한 함수를 호출함
+    }
+
+    void selwhom_iv_clickListener() {
+        ImageView ivBack = findViewById(R.id.selectwhom_back);
+        ivBack.setOnClickListener(v -> finish());
     }
 
     void selwhom_radiogroup_checkedChangeListener() {

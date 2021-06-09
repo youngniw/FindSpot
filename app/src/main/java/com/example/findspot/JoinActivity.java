@@ -31,7 +31,7 @@ import java.util.Calendar;
 import java.util.concurrent.ExecutionException;
 
 public class JoinActivity extends AppCompatActivity {
-    static String nickName;     //********이렇게 해도 되는가?????? (다른 Activity에도 nickName 써줘야 하는데..)
+    String nickName;
     String checkedID = "";
     TextView tv_joinIsCheckedID;
     EditText et_joinID, et_joinPW, et_joinBirthYear;

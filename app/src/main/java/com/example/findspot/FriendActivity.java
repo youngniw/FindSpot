@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,21 +63,23 @@ public class FriendActivity extends AppCompatActivity {
             }
             return false;
         });
-        ImageButton addFriendBtn = (ImageButton) findViewById(R.id.friend_add);
-        addFriendBtn.setOnClickListener(listener);
+
+        friendClickListener();
     }
 
-    //친구 추가 이미지버튼 클릭 이벤트
-    View.OnClickListener listener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
+    public void friendClickListener() {
+        ImageView ivBack = findViewById(R.id.friend_back);
+        ivBack.setOnClickListener(v -> finish());
+
+        ImageButton addFriendBtn = findViewById(R.id.friend_add);
+        addFriendBtn.setOnClickListener(v -> {      //친구 추가 이미지버튼 클릭 이벤트
             AddFriendDialog addFriendDialog = new AddFriendDialog(FriendActivity.this, friendNick -> {
                 friendList.add(friendNick);     //친구리스트에 추가
                 adapter.notifyDataSetChanged();
             }, nickName, friendList);
             addFriendDialog.show();
-        }
-    };
+        });
+    }
 
     //스와이프 했을 때 나올 삭제 메뉴
     SwipeMenuCreator creator = menu -> {

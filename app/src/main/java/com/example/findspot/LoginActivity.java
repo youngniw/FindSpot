@@ -39,6 +39,8 @@ import static com.example.findspot.HomeActivity.groupList;
 
 public class LoginActivity extends AppCompatActivity {
     static String nickName;
+    @SuppressLint("StaticFieldLeak")
+    static GoogleSignInClient mGoogleSignInClient;
     EditText et_loginID, et_loginPW;
     Button btn_login, btn_join;
     LinearLayout llBtn_login_google;
@@ -95,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
     void login_socialbtn_clickListener() {      //구글 소셜로그인 버튼을 클릭했을 때에 해당하는 onClickListener를 정의함
         GoogleSignInOptions gsio = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(LoginActivity.this, gsio);       //GoogleSignInClient 객체를 만듬
+        mGoogleSignInClient = GoogleSignIn.getClient(LoginActivity.this, gsio);       //GoogleSignInClient 객체를 만듬
 
         llBtn_login_google.setOnClickListener(v -> {
             //기존에 로그인 했던 계정을 확인
@@ -223,6 +225,12 @@ public class LoginActivity extends AppCompatActivity {
 
                         Toast.makeText(getApplicationContext(), nickName+"님 환영합니다:)", Toast.LENGTH_SHORT).show();
                         Intent it_home = new Intent(LoginActivity.this, HomeActivity.class);        //홈화면으로 화면이 전환됨
+                        Bundle bundle = new Bundle();
+                        if (isSocialLogin == 0)
+                            bundle.putBoolean("isSocialLogin", false);
+                        else
+                            bundle.putBoolean("isSocialLogin", true);
+                        it_home.putExtras(bundle);
                         startActivity(it_home);     //로그인이 가능하므로 Home창으로 넘어감
                         finish();
                     } else {            //로그인 가능하지 않음
@@ -278,6 +286,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 Toast.makeText(getApplicationContext(), nickName+"님 환영합니다:)", Toast.LENGTH_SHORT).show();
                 Intent it_home = new Intent(LoginActivity.this, HomeActivity.class);        //홈화면으로 화면이 전환됨
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("isSocialLogin", true);
                 startActivity(it_home);     //로그인이 가능하므로 Home창으로 넘어감
                 finish();
             };

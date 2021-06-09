@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.example.findspot.adapter.GroupListAdapter;
 import com.example.findspot.data.GroupInfo;
+import com.example.findspot.dialog.AddFriendDialog;
 import com.example.findspot.dialog.AddGroupDialog;
 import com.example.findspot.request.DelGroupRequest;
 
@@ -60,21 +62,23 @@ public class GroupActivity extends AppCompatActivity {
             }
             return false;
         });
-        ImageButton addGroupBtn = (ImageButton) findViewById(R.id.group_add);
-        addGroupBtn.setOnClickListener(listener);
+
+        groupClickListener();
     }
 
-    //그룹 추가 이미지버튼 클릭 이벤트
-    View.OnClickListener listener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
+    public void groupClickListener() {
+        ImageView ivBack = findViewById(R.id.group_back);
+        ivBack.setOnClickListener(v -> finish());
+
+        ImageButton addGroupBtn = (ImageButton) findViewById(R.id.group_add);
+        addGroupBtn.setOnClickListener(v -> {      //그룹 추가 이미지버튼 클릭 이벤트
             AddGroupDialog addGroupDialog = new AddGroupDialog(GroupActivity.this, group -> {
                 groupList.add(group);
                 adapter.notifyDataSetChanged();
             }, nickName, friendList, groupList);
             addGroupDialog.show();
-        }
-    };
+        });
+    }
 
     //스와이프 했을 때 나올 삭제 메뉴
     SwipeMenuCreator creator = menu -> {

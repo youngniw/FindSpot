@@ -14,7 +14,6 @@
         android:text="@string/join_title"
         android:textColor="#000000"
         android:textSize="30sp"
-        android:textStyle="bold"
         app:layout_constraintVertical_bias="0.636"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -66,7 +65,7 @@
                 android:id="@+id/join_id_check"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/join_duplicate_btn" />
+                android:text="@string/join_duplicate_btn"/>
         </LinearLayout>
         <TextView
             android:id="@+id/join_isCheckedID"
@@ -119,7 +118,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="@string/join_gender" />
+                android:text="@string/gender" />
 
             <Switch
                 android:id="@+id/join_gender"
@@ -145,7 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#000000"
-                android:text="@string/join_birthYear" />
+                android:text="@string/birthYear" />
 
             <EditText
                 android:id="@+id/join_birthYear"
@@ -177,14 +176,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
-                android:text="@string/join_ok"
+                android:text="@string/ok"
                 style="?android:attr/buttonBarButtonStyle" />
 
             <Button
                 android:id="@+id/join_cancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/join_cancel"
+                android:text="@string/cancel"
                 style="?android:attr/buttonBarButtonStyle" />
         </LinearLayout>
     </LinearLayout>
@@ -193,6 +192,7 @@
         android:id="@+id/copyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
         app:layout_constraintVertical_bias="1"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintEnd_toEndOf="parent"

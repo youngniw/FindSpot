@@ -1,5 +1,6 @@
 package com.example.findspot;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageButton;
@@ -15,6 +16,9 @@ import java.util.ArrayList;
 public class HomeActivity extends AppCompatActivity {
     public static ArrayList<GroupInfo> groupList;
     public static ArrayList<String> friendList;
+    public static Activity activity;
+
+    boolean isSocialLogin;
 
     LinearLayout linear_home_findspot;
     ImageButton imgbtn_home_user;
@@ -24,6 +28,9 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        activity = HomeActivity.this;
+        isSocialLogin = getIntent().getExtras().getBoolean("isSocialLogin");
 
         linear_home_findspot = (LinearLayout) findViewById(R.id.home_findspot);
         imgbtn_home_user = (ImageButton) findViewById(R.id.home_user);
@@ -42,6 +49,9 @@ public class HomeActivity extends AppCompatActivity {
         //"마이페이지" 버튼을 클릭했을 때
         imgbtn_home_user.setOnClickListener(v -> {
             Intent it_mypage = new Intent(HomeActivity.this, MyPageActivity.class);         //마이페이지 창으로 화면이 전환됨
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("isSocialLogin", isSocialLogin);
+            it_mypage.putExtras(bundle);
             startActivity(it_mypage);
         });
         //"친구(추가/삭제)" 버튼을 클릭했을 때

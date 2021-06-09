@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
@@ -71,12 +72,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         setContentView(R.layout.activity_showmiddle);
 
         mapView = new MapView(this);
-        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.shownmiddle_mapview);
+        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.showmiddle_mapview);
         mapViewContainer.addView(mapView);
 
-        ImageButton wholegps = findViewById(R.id.shownmiddle_viewAllUser);
-        wholegps.setOnClickListener(v -> mapView.fitMapViewAreaToShowAllPOIItems());
+        ImageView ivBack = findViewById(R.id.showmiddle_back);
+        ivBack.setOnClickListener(v -> finish());
 
+        ImageButton wholegps = findViewById(R.id.showmiddle_viewAllUser);
+        wholegps.setOnClickListener(v -> mapView.fitMapViewAreaToShowAllPOIItems());
 
         //이전 Activity에 따라 사용할 list 설정
         String getExtra_activity = getIntent().getStringExtra("activity_tag");

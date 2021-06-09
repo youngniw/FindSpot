@@ -7,12 +7,27 @@
     android:layout_margin="3dp"
     android:background="@drawable/full_border">
 
+    <ImageView
+        android:id="@+id/selectwhom_back"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/back"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/selectwhom_title"
+        app:layout_constraintBottom_toTopOf="@id/selectwhom_baseline01"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintVertical_bias="0.5" />
+
     <TextView
         android:id="@+id/selectwhom_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="대상자 선택"
+        android:text="@string/selectwhom_title"
         android:textStyle="bold"
         android:textColor="#000000"
         android:textSize="25sp"
@@ -61,13 +76,13 @@
                 android:id="@+id/selectwhom_random"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="임의로 위치 선택" />
+                android:text="@string/selectwhom_random_radio" />
 
             <RadioButton
                 android:id="@+id/selectwhom_group"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="그룹 선택"
+                android:text="@string/selectwhom_group_radio"
                 android:layout_marginTop="20dp"/>
 
         </RadioGroup>
@@ -86,21 +101,25 @@
         android:id="@+id/selectwhom_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:text="위치 선택하기"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:text="@string/selectwhom_next_btn"
         app:layout_constraintBottom_toTopOf="@id/copyright"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9" />
+        app:layout_constraintVertical_bias="0.87" />
 
     <TextView
         android:id="@+id/copyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
         app:layout_constraintVertical_bias="1"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="Copyright, 소은영은, All rights reserved " />
+        android:text="@string/copyright" />
 </androidx.constraintlayout.widget.ConstraintLayout>

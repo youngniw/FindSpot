@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,8 +71,14 @@ public class ChoiceGPSGroupActivity extends AppCompatActivity {
         btn_search_time = (Button) findViewById(R.id.choice_gps_g_bt_time);
         btn_search_distance = (Button) findViewById(R.id.choice_gps_g_bt_distance);
 
+        choice_iv_clickListener();
         choice_tv_clickListener();         //사용자 GPS 설정 화면의 텍스트뷰에 해당하는 onClickListener를 정의한 함수를 호출함
         choice_btn_clickListener();        //사용자 GPS 설정 화면의 버튼에 해당하는 onClickListener를 정의한 함수를 호출함
+    }
+
+    void choice_iv_clickListener() {
+        ImageView ivBack = findViewById(R.id.choice_gps_g_back);
+        ivBack.setOnClickListener(v -> finish());
     }
 
     void choice_tv_clickListener() {

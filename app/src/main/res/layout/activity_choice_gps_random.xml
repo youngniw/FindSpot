@@ -8,9 +8,24 @@
     android:layout_margin="3dp"
     android:background="@drawable/full_border">
 
+    <ImageView
+        android:id="@+id/choice_gps_r_back"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/back"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/choice_gps_r_title"
+        app:layout_constraintBottom_toTopOf="@id/choice_gps_r_baseline01"
+        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintVertical_bias="0.5" />
+
     <TextView
         android:id="@+id/choice_gps_r_title"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/choice_gps_title"
@@ -121,6 +136,7 @@
         android:id="@+id/copyright"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
         app:layout_constraintVertical_bias="1"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintEnd_toEndOf="parent"
