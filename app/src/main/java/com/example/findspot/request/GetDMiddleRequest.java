@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GetDMiddleRequest extends StringRequest {
-    final static private String URL = "http://222.111.4.158/wheremiddle/distancemiddlestation.php";       //php파일 연돌을 위한 서버 URL을 설정
+    final static private String URL = "http://222.111.4.158/wheremiddle/distancemiddlestation.php";       //php파일 연동을 위한 서버 URL을 설정
     private final Map<String, String> distanceMiddleInfo;        //전달할 정보(가까운 역을 받기 위한 중심 위치 정보)
 
     //middleLat와 middleLong를 위치로 하는 지역의 근처 지하철역 5개를 주세요!

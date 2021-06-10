@@ -128,10 +128,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == 900) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
@@ -226,10 +223,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), nickName+"님 환영합니다:)", Toast.LENGTH_SHORT).show();
                         Intent it_home = new Intent(LoginActivity.this, HomeActivity.class);        //홈화면으로 화면이 전환됨
                         Bundle bundle = new Bundle();
-                        if (isSocialLogin == 0)
-                            bundle.putBoolean("isSocialLogin", false);
-                        else
-                            bundle.putBoolean("isSocialLogin", true);
+                        bundle.putBoolean("isSocialLogin", isSocialLogin != 0);
                         it_home.putExtras(bundle);
                         startActivity(it_home);     //로그인이 가능하므로 Home창으로 넘어감
                         finish();

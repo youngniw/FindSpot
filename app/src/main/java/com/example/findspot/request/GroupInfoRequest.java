@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GroupInfoRequest extends StringRequest {
-    final static private String URL = "http://222.111.4.158/wheremiddle/groupinfo.php";       //php파일 연돌을 위한 서버 URL을 설정
+    final static private String URL = "http://222.111.4.158/wheremiddle/groupinfo.php";       //php파일 연동을 위한 서버 URL을 설정
     private final Map<String, String> groupUserInfo;        //전달할 정보(중간지점을 찾기 위한 그룹정보 전달)
 
     public GroupInfoRequest(GroupInfo groupInfo, Response.Listener<String> listener) {

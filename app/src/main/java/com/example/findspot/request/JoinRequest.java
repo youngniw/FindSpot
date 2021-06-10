@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JoinRequest extends StringRequest {
-    final static private String URL = "http://222.111.4.158/wheremiddle/join.php";       //php파일 연돌을 위한 서버 URL을 설정
+    final static private String URL = "http://222.111.4.158/wheremiddle/join.php";       //php파일 연동을 위한 서버 URL을 설정
     private final Map<String, String> userInfo;        //전달할 정보(회원가입을 위한 사용자 정보)
 
     public JoinRequest(String userID, String userPW, String userNickName, String gender, String birthYear, String socialLogin, Response.Listener<String> listener) {

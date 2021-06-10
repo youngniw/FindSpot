@@ -1,9 +1,16 @@
 package com.example.findspot;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +35,9 @@ import static com.example.findspot.LoginActivity.mGoogleSignInClient;
 import static com.example.findspot.LoginActivity.nickName;
 
 public class MyPageActivity extends AppCompatActivity {
-    boolean isSocialLogin;
+    @SuppressLint("StaticFieldLeak")
+    public static Activity activity;
+    boolean isSocialLogin, isNameChanged = false;
     TextView tv_nickName, tv_editProfile, tv_changeNickName, tv_changePassword, tvInquiry, tvLogout, tvSecession;
 
     @Override
@@ -36,16 +45,30 @@ public class MyPageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mypage);
 
+        activity = MyPageActivity.this;
         isSocialLogin = getIntent().getExtras().getBoolean("isSocialLogin");
 
         tv_nickName = findViewById(R.id.mypage_nickname);
+        if (isSocialLogin) {
+            String showName = nickName+" (소셜로그인)";
+            tv_nickName.setText(showName);
+
+            Spannable span = (Spannable) tv_nickName.getText();
+            span.setSpan(new ForegroundColorSpan(Color.parseColor("#398E3D")), nickName.length()+1, showName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            span.setSpan(new RelativeSizeSpan(0.7f), nickName.length()+1, showName.length(), Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
+        }
+        else
             tv_nickName.setText(nickName);
+
         tv_editProfile = findViewById(R.id.mypage_edit_profile);
         tv_changeNickName = findViewById(R.id.mypage_change_nickname);
         tv_changePassword = findViewById(R.id.mypage_change_password);
         tvInquiry = findViewById(R.id.mypage_inquiry);
         tvLogout = findViewById(R.id.mypage_logout);
         tvSecession = findViewById(R.id.mypage_secession);
+
+        if (isSocialLogin)
+            tv_changePassword.setVisibility(View.GONE);
 
         myPage_clickListener();
     }
@@ -76,9 +99,7 @@ public class MyPageActivity extends AppCompatActivity {
         });
 
         //문의하기 TextView 클릭 리스너 설정
-        tvInquiry.setOnClickListener(v -> {
-            startActivity(new Intent(MyPageActivity.this, InquiryActivity.class));
-        });
+        tvInquiry.setOnClickListener(v -> startActivity(new Intent(MyPageActivity.this, InquiryActivity.class)));
 
         //로그아웃 TextView 클릭 리스너 설정
         tvLogout.setOnClickListener(v -> mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {        //로그아웃 기능
@@ -105,6 +126,9 @@ public class MyPageActivity extends AppCompatActivity {
                 });
             }
             else {
+                HomeActivity homeActivity = (HomeActivity) HomeActivity.activity;
+                homeActivity.finish();
+
                 try {
                     new SecessionTask().execute().get();
                 } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
@@ -112,21 +136,35 @@ public class MyPageActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void finish() {
+        Intent noticeNameChanged = new Intent();
+        Bundle noticeInfo = new Bundle();
+        noticeInfo.putBoolean("isNameChanged", isNameChanged);
+        noticeNameChanged.putExtras(noticeInfo);
+        setResult(RESULT_OK, noticeNameChanged);
+
+        super.finish();
+    }
+
     //DB에게 닉네임 변경을 위한 작업을 수행함
     @SuppressLint("StaticFieldLeak")
     public class NickNameChangeTask extends AsyncTask<String, Void, String> {
         String newNickName; //사용자가 변경을 원하는 닉네임 이름
 
-        NickNameChangeTask(String nickName) { newNickName = nickName; }
+        NickNameChangeTask(String nickName) {
+            super();
+            newNickName = nickName;
+        }
         @Override
         protected String doInBackground(String... strings) {
-
-            //TODO: 데이터베이스에 변경할 닉네임을 줌으로써 사용자의 그룹을 다시 얻어옴 (안드로이드가 할까 서버가 줄까)
             Response.Listener<String> responseListener = response -> {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     boolean accept = jsonObject.getBoolean("accept");
                     if (accept) {   //닉네임 변경 완료시,
+                        isNameChanged = true;
+
                         for (GroupInfo gItem : groupList) { //그룹 데이터 변경
                             //내가 방장인 방이라면 방장 이름을 변경한 닉네임으로 변경
                             if (gItem.getGHostName().equals(nickName)) gItem.setGHostName(newNickName);
@@ -151,6 +189,7 @@ public class MyPageActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     public class SecessionTask extends AsyncTask<String, Void, String> {        //탈퇴
         SecessionTask() { super(); }
 
