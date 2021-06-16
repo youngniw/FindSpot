@@ -147,6 +147,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
                 adapter = new PositionPagerAdapter(this, list, resultDPositions);
                 pager.setAdapter(adapter);
+                pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    public void onPageSelected(int position) {
+                        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultDPositions.get(position).getResultPositionLat(), resultDPositions.get(position).getResultPositionLong()), 4, false);
+                    }
+
+                    public void onPageScrollStateChanged(int state) { }
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+                });
                 indicator.setViewPager(pager);
                 adapter.registerDataSetObserver(indicator.getDataSetObserver());
                 adapter.notifyDataSetChanged();
@@ -192,6 +200,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
                 adapter = new PositionPagerAdapter(this, true, list, resultTPositions);
                 pager.setAdapter(adapter);
+                pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    public void onPageSelected(int position) {
+                        mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultTPositions.get(position).getResultPositionLat(), resultTPositions.get(position).getResultPositionLong()), 4, false);
+                    }
+
+                    public void onPageScrollStateChanged(int state) { }
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+                });
                 indicator.setViewPager(pager);
                 adapter.registerDataSetObserver(indicator.getDataSetObserver());
                 adapter.notifyDataSetChanged();
@@ -303,6 +319,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                     indicator.setViewPager(pager);
                     adapter.registerDataSetObserver(indicator.getDataSetObserver());
                     adapter.notifyDataSetChanged();
+                    pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                        public void onPageSelected(int position) {
+                            mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultDPositions.get(position).getResultPositionLat(), resultDPositions.get(position).getResultPositionLong()), 4, false);
+                        }
+
+                        public void onPageScrollStateChanged(int state) { }
+                        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+                    });
 
                     //그룹으로 결과를 찾은 경우에는, 중간 지점 결과를 DB에 보내 history에 저장함
                     if (getIntent().getStringExtra("activity_tag").equals("group"))
@@ -522,6 +546,14 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
 
         pager.setAdapter(adapter);
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            public void onPageSelected(int position) {
+                mapView.setMapCenterPointAndZoomLevel(MapPoint.mapPointWithGeoCoord(resultTPositions.get(position).getResultPositionLat(), resultTPositions.get(position).getResultPositionLong()), 4, false);
+            }
+
+            public void onPageScrollStateChanged(int state) { }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+        });
         indicator.setViewPager(pager);
         adapter.registerDataSetObserver(indicator.getDataSetObserver());
 
