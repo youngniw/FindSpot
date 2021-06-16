@@ -1,7 +1,6 @@
 package com.example.findspot;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.findspot.data.RouteInfo;
@@ -28,7 +27,6 @@ public class MiddleTime {
                 try {
                     //API Value는 API 호출 메소드 명을 따라감
                     if (api == API.SEARCH_PUB_TRANS_PATH) {
-                        Log.i("PResult", odsayData.getJson().getJSONObject("result").getJSONArray("path").getString(0));
                         JSONObject optimal_route = odsayData.getJson().getJSONObject("result").getJSONArray("path").getJSONObject(0);
                         JSONObject info = optimal_route.getJSONObject("info");
                         JSONArray subPath = optimal_route.getJSONArray("subPath");
@@ -59,10 +57,7 @@ public class MiddleTime {
                             }
                         }
 
-                        Log.i("resultGetPathSize", String.valueOf(tmp.getPaths().size()));
                         result.getRouteInfo().add(tmp);
-                        Log.i("resultRouteNum", String.valueOf(result.getRouteInfo().size()));
-
                         result.addSaveN();
 
                         if (result.getSize() == result.getSaveCompleteN())

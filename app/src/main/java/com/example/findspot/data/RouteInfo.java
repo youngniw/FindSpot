@@ -37,14 +37,11 @@ public class RouteInfo {
             this.arriveName = arriveName;
             this.subwayName = subwayName;
             this.busName = busName;
-
-            Log.i("PResult서브경로", trafficType+" / "+subTime+" / "+boardName+" / "+arriveName+" / "+subwayName+" / "+busName);
         }
 
         public SubPath(int trafficType, int subTime) {     //도보일 때
             this.trafficType = trafficType;
             this.subTime = subTime;
-            Log.i("PResult도보", trafficType+" / "+subTime+" / ");
         }
 
         public int getSubTime() { return subTime; }

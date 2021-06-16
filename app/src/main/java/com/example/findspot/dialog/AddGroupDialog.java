@@ -87,7 +87,7 @@ public class AddGroupDialog extends Dialog {
 
         //"완료"버튼 눌렀을 때,
         btComplete.setOnClickListener(v -> {
-            String groupName = etGroupName.getText().toString();        //TODO: 공백만 썼으면 추가 안되도록 해야 함!
+            String groupName = etGroupName.getText().toString().trim();     //TODO: 8명 초과하면 안된다고 표시 (빨간색으로 흔드는 효과..?)
             ArrayList<String> groupUsers = new ArrayList<>();
             groupUsers.add(userNickName);       //방장명이 제일 먼저 포함됨
 

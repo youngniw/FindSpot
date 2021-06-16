@@ -10,6 +10,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,6 +54,7 @@ public class EditProfileActivity extends AppCompatActivity {
     String history_roadName;    //DB에서 가져온 user의 도로명주소
     double longitude = 0, latitude = 0; //도로명주소와 관련된 longitude, latitude (현재 갱신되는 값)
     boolean isGpsCheck = false; //GPS를 사용한 주소인지 체크
+    Location location;
 
     EditText et_birthYear, et_gps;
     Button btn_ok;
@@ -73,9 +75,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         try {
             new GetUserInfoTask().execute().get();  //사용자의 정보 가져오기(성별, 연도, 도로명주소)
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        } catch (InterruptedException | ExecutionException e) { e.printStackTrace(); }
 
         editProfile_clickListener();
     }
@@ -114,41 +114,50 @@ public class EditProfileActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},101);
             }
             try {
-                final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);    //위치 관리자 객체 참조
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);    //위치 관리자 객체 참조
                 boolean isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);          //GPS정보 가져오기
                 boolean isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);  //현재 네트워크 상태 값 알아오기
 
                 //리스너는 껍데기일뿐..쓸모없음
                 LocationListener locationListener = new LocationListener() {
                     @Override
-                    public void onLocationChanged(@NonNull Location location) { }
+                    public void onLocationChanged(@NonNull Location loc) {
+                        if (location == null) {
+                            location = loc;
+                            latitude = loc.getLatitude();      //gps에서 받아온 위도 저장
+                            longitude = location.getLongitude();    //gps에서 받아온 경도 저장
+                            try {
+                                new RoadNameRestApiTask().execute().get();  //주소 구하기 API 실행
+                            } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
+                        }
+                    }
                     @Override
                     public void onProviderEnabled(@NonNull String provider) { }
                     @Override
                     public void onProviderDisabled(@NonNull String provider) { }
                 };
 
-                Location location = null;
-                if (isNetworkEnabled) {
-                    lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000*60*10, 10, locationListener);  //새로운 위치값으로 업데이트
-                    location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);   //최근 위치값 가져오기
-                    if (location != null) {
-                        Log.i("현재 상태", "network_provider에서 Rest API 호출");
-                        latitude = location.getLatitude();      //gps에서 받아온 위도 저장
-                        longitude = location.getLongitude();    //gps에서 받아온 경도 저장
-                        try {
-                            new RoadNameRestApiTask().execute().get();  //주소 구하기 API 실행
-                        } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
-                    }
+                if (!isGPSEnabled && !isNetworkEnabled) {
+                    Toast.makeText(this, "현재 GPS기능이 꺼져있어 GPS 설정 화면으로 이동합니다.", Toast.LENGTH_SHORT).show();
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
                 }
-
-                if (isGPSEnabled) {
-                    if (location == null) {
-                        lm.requestLocationUpdates(  //새로운 위치값으로 업데이트
-                                LocationManager.GPS_PROVIDER, 1000*60*10, 10, locationListener);
+                else {
+                    if (isNetworkEnabled) {
+                        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000*60*10, 10, locationListener);  //새로운 위치값으로 업데이트
+                        location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);   //최근 위치값 가져오기
+                        if (location != null) {
+                            latitude = location.getLatitude();      //gps에서 받아온 위도 저장
+                            longitude = location.getLongitude();    //gps에서 받아온 경도 저장
+                            try {
+                                new RoadNameRestApiTask().execute().get();  //주소 구하기 API 실행
+                            } catch (ExecutionException | InterruptedException e) { e.printStackTrace(); }
+                        }
+                    }
+                    else if (isGPSEnabled) {
+                        lm.requestLocationUpdates( LocationManager.GPS_PROVIDER, 1000*60*10, 10, locationListener);
                         location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);   //최근 위치값 가져오기
                         if (location != null) {
-                            Log.i("현재 상태", "gps_provider에서 Rest API 호출");
                             latitude = location.getLatitude();      //gps에서 받아온 위도 저장
                             longitude = location.getLongitude();    //gps에서 받아온 경도 저장
                             try {
@@ -208,7 +217,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                 if (myConn.getResponseCode() == 200) {  //정상적으로 받았을 경우
                     //응답 읽기
-                    BufferedReader rd = new BufferedReader(new InputStreamReader(myConn.getInputStream(), "UTF-8"));
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(myConn.getInputStream(), StandardCharsets.UTF_8));
                     String jsonText = readAll(rd);  //응답 데이터를 한꺼번에 string으로 묶기
                     JSONObject json = new JSONObject(jsonText);
 
@@ -233,23 +242,21 @@ public class EditProfileActivity extends AppCompatActivity {
     //사용자 정보 가져오기
     @SuppressLint("StaticFieldLeak")
     public class GetUserInfoTask extends AsyncTask<String, Void, String> {
-        GetUserInfoTask() { }
+        GetUserInfoTask() { super(); }
 
         @Override
         protected String doInBackground(String... strings) {
             Response.Listener<String> responseListener = response -> {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
-                    String gender = jsonObject.getString("gender"); //기록에 없으면 ""
-                    int birthYear = jsonObject.getInt("birthYear"); //기록에 없으면 0
+                    String gender = jsonObject.getString("gender");     //기록에 없으면 ""
+                    int birthYear = jsonObject.getInt("birthYear");     //기록에 없으면 0
                     history_roadName = jsonObject.getString("roadName");  //기록에 없으면 ""
 
                     sw_editProfileGender.setChecked(!gender.equals("") && gender.equals("F"));  //성별 설정:기록에 F라고 적혀있는 경우를 제외하면 모두 false(남자)로 설정
                     if (birthYear != 0) et_birthYear.setText(jsonObject.getString("birthYear"));    //생년월일 설정
                     if (!history_roadName.equals("")) et_gps.setText(history_roadName);         //주소 설정
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                } catch (JSONException e) { e.printStackTrace(); }
             };
 
             //서버로 Volley를 이용해서 요청을 함
@@ -269,6 +276,8 @@ public class EditProfileActivity extends AppCompatActivity {
         double latitude, longitude;
 
         SetUserInfoTask(String gender, String birthYear, String roadName, double latitude, double longitude) {
+            super();
+
             this.gender = gender;
             if (birthYear.equals("")) this.birthYear = "0"; //연도 값이 바뀌지 않았을 경우 0으로 대체함
             else this.birthYear = birthYear;

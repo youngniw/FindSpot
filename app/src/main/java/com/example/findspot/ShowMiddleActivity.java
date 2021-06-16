@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -282,7 +281,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
                         double nearLong = nearStationArray.getJSONObject(i).getDouble("x");
                         StationInfo nearStation = new StationInfo(nearStationName, nearLat, nearLong);
                         nearStationList.add(nearStation);
-                        Log.d("nearStation", nearStationName);
 
                         //5개의 지하철역의 핑 설정
                         MapPOIItem station = new MapPOIItem();
@@ -448,7 +446,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
     //nearStationList의 각 원소를 기준으로 반경 2km내의 지하철 역들 정보(TimeGap) 계산 - API 사용
     void getNearNeighborTime(boolean isNextSearch) {
         if (!isNextSearch) {    //searchTPositions에 값이 존재하지 않으므로 minTimeGaps로 조사함
-            Log.d("stationNoIsNextSearch", "--------->_<---------");
             countFinishLoop = nearStationList.size();       //동기화를 맞추기 위한 사이즈 확인
 
             //minTimGapS를 중심으로 하여 반경 2km내의 지하철 역에 대해서 조사함
@@ -466,7 +463,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
         }
 
         else {
-            Log.d("stationIsNextSearch", "--------->_<---------");
             for (ArrayList<StationInfo> nextNearList : nextSearchList) {
                 countFinishLoop += nextNearList.size();
             }
@@ -490,7 +486,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
     //결과를 뽑아내고 출력함
     void resultTMiddle() {
-        Log.d("stationNextNextNextNext", "--------->_<---------");
         if (resultTPositions.size() == 0) {     //minTimeGaps의 주변 역까지 조사를 했지만 result후보 역이 없을 때
             if (minTimeGapS.getTimeGap() > current.getTimeGap())
                 resultTPositions.add(current);
@@ -500,10 +495,6 @@ public class ShowMiddleActivity extends AppCompatActivity implements MapView.POI
 
         //resultTPositions리스트에 최대 및 최소 소요시간의 오차가 10보다 작거나 같은 지하철 역들이 포함됨
         Collections.sort(resultTPositions);     //오름차순 정렬함
-
-        for (int i=0; i<resultTPositions.size(); i++) {
-            Log.d("stationResult", resultTPositions.get(i).getStationName());
-        }
 
         //화면에 결과로 포함된 지하철 역 핑 출력
         MapPOIItem stationM = new MapPOIItem();

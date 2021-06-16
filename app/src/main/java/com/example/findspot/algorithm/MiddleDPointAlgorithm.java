@@ -52,7 +52,7 @@ public class MiddleDPointAlgorithm {
                         checkedIndex.put(candidateIndex1, candidatePos1);
                         checkedIndex.put(candidateIndex2, candidatePos2);
                         //setPosition에서 삭제
-                        setPositions.remove(candidatePos1);     //TODO: candidatePos 형식 바꿔야 함
+                        setPositions.remove(candidatePos1);
                         setPositions.remove(candidatePos2);
                         //combine된 새로운 위치 생성
                         double newLat = (candidatePos1.getLatitude() + candidatePos2.getLatitude()) / 2;

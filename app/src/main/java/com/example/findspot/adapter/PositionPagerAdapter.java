@@ -84,7 +84,6 @@ public class PositionPagerAdapter extends PagerAdapter {
         TextView gapTV = view.findViewById(R.id.tv_Gap);        //소요시간/거리 차 TextView
         LinearLayout ll_container = (LinearLayout)view.findViewById(R.id.ll_container);
 
-        //TODO: 시간과 거리 기준을 나눠야함(isStandardTime) -> 짧게 수정해야 함
         if (isStandardTime) {
             resultStationTV.setText("\uD83D\uDCCD "+tPositions.get(position).getStationName()+"역");
             gapTV.setText("오차시간: "+tPositions.get(position).getTimeGap()+"분");
@@ -127,16 +126,29 @@ public class PositionPagerAdapter extends PagerAdapter {
                 if (!isHistory) {
                     //사용자 길찾기 경로
                     userPathTV = new TextView(context);
+                    userPathTV.setLineSpacing(0f, 1.3f);
                     userPathTV.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
                     userPathTV.setTextColor(Color.BLACK);
                     StringBuilder path= new StringBuilder();
                     ArrayList<RouteInfo.SubPath> tmpPath = tPositions.get(position).getRouteInfo().get(i).getPaths();
-                    for(int j=0; j<tPositions.get(position).getRouteInfo().get(i).getPaths().size(); j++) {
-                        if (tmpPath.get(j).getTrafficType() == 1) path.append("\uD83D\uDE8A").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getSubwayName()).append(")-");
-                        else if (tmpPath.get(j).getTrafficType() == 2) path.append("\uD83D\uDE8C").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getBusName()).append(")-");
+                    for(int j=0; j<tmpPath.size(); j++) {
+                        if (tmpPath.get(j).getTrafficType() == 1) {     //지하철일 경우
+                            if (j>1 && tmpPath.get(j-2).getTrafficType()==1 && tmpPath.get(j-1).getTrafficType()==3)     //지하철 -> 지하철(현재)
+                                path.append("\uD83D\uDE8A").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j-2).getSubwayName()).append(" \u21A6 ").append(tmpPath.get(j).getSubwayName()).append(") \u27AD ");
+
+                            else
+                                path.append("\uD83D\uDE8A").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getSubwayName()).append(") \u27AD ");
+                        }
+                        else if (tmpPath.get(j).getTrafficType() == 2) {    //버스일 경우
+                            if (j>1 && tmpPath.get(j-2).getTrafficType()==1 && tmpPath.get(j-1).getTrafficType()==3)  //지하철 -> 버스(현재)
+                                path.append("\uD83D\uDE8A").append(tmpPath.get(j-2).getArriveName()).append("(").append(tmpPath.get(j-2).getSubwayName()).append(") \u27AD ");
+
+                            path.append("\uD83D\uDE8C").append(tmpPath.get(j).getBoardName()).append("(").append(tmpPath.get(j).getBusName()).append(") \u21A6 ");
+                            path.append(tmpPath.get(j).getArriveName()).append("(하차) \u27AD ");
+                        }
                     }
                     path.append(tPositions.get(position).getStationName()).append(" 도착");
-                    userPathTV.setText(path.toString());
+                    userPathTV.setText(path.toString().replace(" ", "\u00A0"));
                     userPathTV.setLayoutParams(tv_params);
                 }
 
@@ -144,7 +156,8 @@ public class PositionPagerAdapter extends PagerAdapter {
                 userResultLayout.addView(userNameTV);
                 userResultLayout.addView(userTimeTV);
                 userLayout.addView(userResultLayout);
-                userLayout.addView(userPathTV);
+                if (!isHistory)
+                    userLayout.addView(userPathTV);
                 ll_container.addView(userLayout);
             }
         }

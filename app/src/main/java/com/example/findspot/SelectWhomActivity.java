@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -132,7 +131,6 @@ public class SelectWhomActivity extends AppCompatActivity {
 
                     //이전에 이 그룹에서 중간 지점 찾기를 한 기록이 있는 지 여부에 따른 수행(기록이 있음-> TRUE)
                     JSONObject groupObject = jsonObject.getJSONObject("group");
-                    Log.d("받은 결과", jsonObject.getString("group"));
                     if (groupObject.getBoolean("historyTF")) {
                         if (groupObject.getJSONArray("usersPick").length() == groupObject.getJSONArray("middleTakeTOrD").length()) {
                             ghistory.setStandard(groupObject.getString("standard"));  //시간(T) or 거리(D) 기준
@@ -155,7 +153,7 @@ public class SelectWhomActivity extends AppCompatActivity {
                                         usersPick.getJSONObject(i).getDouble("y"), usersPick.getJSONObject(i).getDouble("x")));
                             }
 
-                            JSONArray hisStations = groupObject.getJSONArray("hisStations");    //가장 시간이 짧은 역 이외의 결과로 나온 역을 받아옴
+                            JSONArray hisStations = groupObject.getJSONArray("hisStations");    //가장 시간/거리가 짧은 역 이외의 결과로 나온 역을 받아옴
                             for (int i=0; i<hisStations.length(); i++) {
                                 ghistory.getHisStations().add(new StationInfo(hisStations.getJSONObject(i).getString("station"), hisStations.getJSONObject(i).getDouble("stationLat"), hisStations.getJSONObject(i).getDouble("stationLong")));
                                 JSONArray nearTakeTOrD = hisStations.getJSONObject(i).getJSONArray("nearTakeTOrD");      //중간 이외 결과 위치에 대한 사용자들의 소요시간/거리

@@ -1,7 +1,6 @@
 package com.example.findspot;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.findspot.data.PositionItemInfo;
 import com.example.findspot.data.RouteInfo;
@@ -90,7 +89,6 @@ public class CandidateTimePosition implements Comparable<CandidateTimePosition> 
                 maxTime = routes.get(i).getTotalTime();
         }
         timeGap = maxTime - minTime;
-        Log.i("CTP_stationGap+Name", timeGap+": "+ stationName);
 
         switch (whichStation) {
             case 0: {   //거리상 중간 지점에 해당하는 역이 객체일 때
